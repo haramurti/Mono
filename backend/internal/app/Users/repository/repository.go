@@ -55,14 +55,6 @@ func (r *userRepository) UpdateLastLogin(ctx context.Context, id string) error {
 // Refresh Token Repository
 // ─────────────────────────────────────────────
 
-// RefreshToken — model untuk tabel refresh_tokens
-type RefreshToken struct {
-	Token     string    `gorm:"primaryKey;type:varchar(255)"`
-	UserID    string    `gorm:"type:uuid;not null;index"`
-	ExpiresAt time.Time `gorm:"not null"`
-	CreatedAt time.Time
-}
-
 type refreshTokenRepository struct {
 	db  *gorm.DB
 	ttl time.Duration
@@ -76,7 +68,7 @@ func NewRefreshTokenRepository(db *gorm.DB) contract.RefreshTokenRepository {
 }
 
 func (r *refreshTokenRepository) Save(ctx context.Context, userID string, token string) error {
-	rt := RefreshToken{
+	rt := entity.RefreshToken{
 		Token:     token,
 		UserID:    userID,
 		ExpiresAt: time.Now().Add(r.ttl),
@@ -85,7 +77,7 @@ func (r *refreshTokenRepository) Save(ctx context.Context, userID string, token 
 }
 
 func (r *refreshTokenRepository) Find(ctx context.Context, token string) (string, error) {
-	var rt RefreshToken
+	var rt entity.RefreshToken
 	err := r.db.WithContext(ctx).
 		Where("token = ? AND expires_at > ?", token, time.Now()).
 		First(&rt).Error
@@ -98,11 +90,11 @@ func (r *refreshTokenRepository) Find(ctx context.Context, token string) (string
 func (r *refreshTokenRepository) Delete(ctx context.Context, token string) error {
 	return r.db.WithContext(ctx).
 		Where("token = ?", token).
-		Delete(&RefreshToken{}).Error
+		Delete(&entity.RefreshToken{}).Error
 }
 
 func (r *refreshTokenRepository) DeleteAllByUserID(ctx context.Context, userID string) error {
 	return r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
-		Delete(&RefreshToken{}).Error
+		Delete(&entity.RefreshToken{}).Error
 }
