@@ -2,7 +2,13 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { hasDemoSession } from "@/shared/lib/auth";
 
-const protectedPrefixes = ["/dashboard", "/chat", "/journal"];
+const protectedPrefixes = [
+  "/capture",
+  "/history",
+  "/dashboard",
+  "/chat",
+  "/journal",
+];
 
 export function proxy(request: NextRequest) {
   const isProtected = protectedPrefixes.some((prefix) =>
@@ -17,5 +23,11 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/chat/:path*", "/journal/:path*"],
+  matcher: [
+    "/capture/:path*",
+    "/history/:path*",
+    "/dashboard/:path*",
+    "/chat/:path*",
+    "/journal/:path*",
+  ],
 };

@@ -1,17 +1,17 @@
 import { apiClient } from "@/shared/lib/axios";
 import type {
-  SendChatMessageRequest,
-  SendChatMessageResponse,
-  TodayChatResponse,
-} from "@/shared/types/mono";
+  SendChatMessageRequestDto,
+  SendChatMessageResponseDto,
+  TodayChatResponseDto,
+} from "./dto";
 
 export async function getTodayChat() {
-  const response = await apiClient.get<TodayChatResponse>("/chat/today");
+  const response = await apiClient.get<TodayChatResponseDto>("/chat/today");
   return response.data;
 }
 
-export async function sendChatMessage(payload: SendChatMessageRequest) {
-  const response = await apiClient.post<SendChatMessageResponse>(
+export async function sendChatMessage(payload: SendChatMessageRequestDto) {
+  const response = await apiClient.post<SendChatMessageResponseDto>(
     "/chat/messages",
     payload,
   );

@@ -1,4 +1,4 @@
-import { subDays } from "date-fns";
+import { addDays, format, startOfMonth, subDays, subMonths } from "date-fns";
 
 import {
   formatDateKey,
@@ -17,6 +17,7 @@ import type {
   JournalState,
   MonthlyRecap,
   MonthlyRecapCard,
+  MonthlyRecapResponse,
   Mood,
   SafetyFlag,
   TodayChatResponse,
@@ -37,6 +38,7 @@ declare global {
 
 const TODAY = getTodayDateKey();
 const CURRENT_MONTH = getCurrentMonthKey();
+const MINIMUM_RECAP_JOURNALS = 3;
 
 function createDemoUser(): User {
   return {
@@ -298,11 +300,17 @@ function createSeedJournal({
 
 function createInitialStore(): DemoStore {
   const today = new Date();
+  const previousMonthStart = startOfMonth(subMonths(today, 1));
   const seedDates = [
     formatDateKey(subDays(today, 4)),
     formatDateKey(subDays(today, 3)),
     formatDateKey(subDays(today, 2)),
     formatDateKey(subDays(today, 1)),
+  ];
+  const previousMonthDates = [
+    formatDateKey(addDays(previousMonthStart, 3)),
+    formatDateKey(addDays(previousMonthStart, 11)),
+    formatDateKey(addDays(previousMonthStart, 19)),
   ];
 
   const journals = Object.fromEntries(
@@ -358,6 +366,45 @@ function createInitialStore(): DemoStore {
           "I want to keep noticing what returns to my mind instead of pushing for a perfect explanation.",
         emotion: ["uncertain", "relieved"],
         topic: ["personal_growth", "future"],
+      }),
+      createSeedJournal({
+        date: previousMonthDates[0],
+        mood: "happy",
+        title: "A Lighter Afternoon Than I Expected",
+        summary:
+          "Today I felt surprisingly light after giving myself permission to step away for a while. The break did not ruin the day. It actually gave me enough room to return with more steadiness.",
+        keyInsight:
+          "A softer pace can bring back energy I thought I had already lost.",
+        suggestedNextAction:
+          "I want to notice the first moment I need a pause instead of waiting until I am already depleted.",
+        emotion: ["grateful", "hopeful"],
+        topic: ["health", "personal_growth"],
+      }),
+      createSeedJournal({
+        date: previousMonthDates[1],
+        mood: "sad",
+        title: "Missing Something I Couldn’t Quite Name",
+        summary:
+          "Today I felt sad in a quiet way that lingered underneath everything else. Writing it down helped me admit that I have been missing a sense of connection more than I expected.",
+        keyInsight:
+          "Sometimes sadness is less about one event and more about what has been absent for a while.",
+        suggestedNextAction:
+          "I want to reach out to one person instead of waiting until I feel clearer first.",
+        emotion: ["lonely", "uncertain"],
+        topic: ["friendship", "relationship"],
+      }),
+      createSeedJournal({
+        date: previousMonthDates[2],
+        mood: "calm",
+        title: "A Day That Felt More Grounded",
+        summary:
+          "Today I felt calmer because I stopped trying to solve everything immediately. I let one small task be enough, and the day felt less sharp because of it.",
+        keyInsight:
+          "Calm often arrives after I let the day be smaller than my expectations.",
+        suggestedNextAction:
+          "I want to begin tomorrow with the same one-step-at-a-time rhythm.",
+        emotion: ["relieved", "motivated"],
+        topic: ["work", "personal_growth"],
       }),
     ].map((journal) => [journal.date, journal]),
   );
@@ -600,12 +647,64 @@ export function getJournalByDate(date: string) {
   return getStore().journalsByDate[date] ?? null;
 }
 
+export function updateJournalByDate(
+  date: string,
+  payload: {
+    title?: string;
+    summary?: string;
+    primaryMood?: Mood;
+    emotionTags?: EmotionTag[];
+    topicTags?: TopicTag[];
+  },
+) {
+  const journal = getStore().journalsByDate[date];
+
+  if (!journal) {
+    return null;
+  }
+
+  if (typeof payload.title !== "undefined") {
+    journal.title = payload.title;
+  }
+  if (typeof payload.summary !== "undefined") {
+    journal.summary = payload.summary;
+  }
+  if (typeof payload.primaryMood !== "undefined") {
+    journal.primaryMood = payload.primaryMood;
+  }
+  if (typeof payload.emotionTags !== "undefined") {
+    journal.emotionTags = payload.emotionTags;
+  }
+  if (typeof payload.topicTags !== "undefined") {
+    journal.topicTags = payload.topicTags;
+  }
+
+  journal.status = "edited";
+  journal.isEdited = true;
+  journal.updatedAt = new Date().toISOString();
+  if (!journal.summarizedAt) {
+    journal.summarizedAt = journal.updatedAt;
+  }
+
+  return journal;
+}
+
 function countCompletedJournalsForMonth(monthKey: string) {
   return Object.values(getStore().journalsByDate).filter(
     (journal) =>
       journal.date.startsWith(monthKey) &&
       (journal.status === "summarized" || journal.status === "edited"),
   ).length;
+}
+
+function getCompletedJournalsForMonth(monthKey: string) {
+  return Object.values(getStore().journalsByDate)
+    .filter(
+      (journal) =>
+        journal.date.startsWith(monthKey) &&
+        (journal.status === "summarized" || journal.status === "edited"),
+    )
+    .sort((left, right) => left.date.localeCompare(right.date));
 }
 
 function computeStreak() {
@@ -658,11 +757,11 @@ function buildMonthlyRecapCard(monthKey: string): MonthlyRecapCard {
       mostFrequentMood: recap.mostFrequentMood,
       moodEmoji: getMoodEmoji(recap.mostFrequentMood),
       journalCount,
-      minimumRequired: 3,
+      minimumRequired: MINIMUM_RECAP_JOURNALS,
     };
   }
 
-  if (journalCount >= 3) {
+  if (journalCount >= MINIMUM_RECAP_JOURNALS) {
     return {
       status: "ready_to_generate",
       month: monthKey,
@@ -671,7 +770,7 @@ function buildMonthlyRecapCard(monthKey: string): MonthlyRecapCard {
       mostFrequentMood: null,
       moodEmoji: null,
       journalCount,
-      minimumRequired: 3,
+      minimumRequired: MINIMUM_RECAP_JOURNALS,
     };
   }
 
@@ -683,8 +782,127 @@ function buildMonthlyRecapCard(monthKey: string): MonthlyRecapCard {
     mostFrequentMood: null,
     moodEmoji: null,
     journalCount,
-    minimumRequired: 3,
+    minimumRequired: MINIMUM_RECAP_JOURNALS,
   };
+}
+
+function buildMonthlyRecapFromJournals(monthKey: string): MonthlyRecap | null {
+  const journals = getCompletedJournalsForMonth(monthKey);
+
+  if (journals.length < MINIMUM_RECAP_JOURNALS) {
+    return null;
+  }
+
+  const moodDistribution = journals.reduce<Partial<Record<Mood, number>>>(
+    (accumulator, journal) => {
+      const mood = journal.primaryMood ?? "unknown";
+      accumulator[mood] = (accumulator[mood] ?? 0) + 1;
+      return accumulator;
+    },
+    {},
+  );
+
+  const [mostFrequentMood = "unknown"] =
+    Object.entries(moodDistribution).sort(
+      (left, right) => (right[1] ?? 0) - (left[1] ?? 0),
+    )[0] ?? [];
+
+  const topEmotionTags = Object.entries(
+    journals.reduce<Record<string, number>>((accumulator, journal) => {
+      journal.emotionTags.forEach((tag) => {
+        accumulator[tag] = (accumulator[tag] ?? 0) + 1;
+      });
+
+      return accumulator;
+    }, {}),
+  )
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 3)
+    .map(([tag]) => tag as MonthlyRecap["topEmotionTags"][number]);
+
+  const topTopicTags = Object.entries(
+    journals.reduce<Record<string, number>>((accumulator, journal) => {
+      journal.topicTags.forEach((tag) => {
+        accumulator[tag] = (accumulator[tag] ?? 0) + 1;
+      });
+
+      return accumulator;
+    }, {}),
+  )
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 3)
+    .map(([tag]) => tag as MonthlyRecap["topTopicTags"][number]);
+
+  const now = new Date().toISOString();
+  const monthName = format(new Date(`${monthKey}-01T00:00:00`), "MMMM");
+
+  return {
+    id: `recap_${monthKey}`,
+    userId: "user_123",
+    month: monthKey,
+    status: "generated",
+    title:
+      mostFrequentMood === "calm"
+        ? `A Steadier ${monthName}`
+        : mostFrequentMood === "happy"
+          ? `A Softer ${monthName}`
+          : `Listening More Closely in ${monthName}`,
+    summary:
+      journals.length >= 4
+        ? "This month, your reflections moved between pressure, relief, and the moments where things started to soften. Across the entries, you kept returning to the need for a smaller pace and a gentler way of carrying the day."
+        : "This month, your entries still carried a few different emotional textures, but a pattern is starting to emerge. You seem to feel clearer when you slow down enough to notice what sits underneath the first reaction.",
+    mostFrequentMood: mostFrequentMood as Mood,
+    moodDistribution,
+    topEmotionTags,
+    topTopicTags,
+    recurringPattern:
+      "When you reduce the pressure to solve everything at once, your writing becomes calmer and more precise.",
+    monthlyInsight:
+      "The month suggests that emotional clarity grows when you let yourself pause before pushing harder.",
+    suggestedFocusNextMonth:
+      "Try protecting one small moment each day where you choose steadiness over urgency.",
+    journalCount: journals.length,
+    generatedAt: now,
+    updatedAt: now,
+  };
+}
+
+export function getMonthlyRecap(monthKey: string): MonthlyRecapResponse {
+  const existing = getStore().monthlyRecapsByMonth[monthKey];
+
+  if (existing) {
+    return existing;
+  }
+
+  const journalCount = countCompletedJournalsForMonth(monthKey);
+
+  if (journalCount < MINIMUM_RECAP_JOURNALS) {
+    return {
+      month: monthKey,
+      status: "not_enough_data",
+      journalCount,
+      minimumRequired: MINIMUM_RECAP_JOURNALS,
+      message: `You need at least ${MINIMUM_RECAP_JOURNALS} journal entries this month to generate a monthly recap.`,
+    };
+  }
+
+  return {
+    month: monthKey,
+    status: "ready_to_generate",
+    journalCount,
+    minimumRequired: MINIMUM_RECAP_JOURNALS,
+  };
+}
+
+export function generateMonthlyRecap(monthKey: string) {
+  const recap = buildMonthlyRecapFromJournals(monthKey);
+
+  if (!recap) {
+    return null;
+  }
+
+  getStore().monthlyRecapsByMonth[monthKey] = recap;
+  return recap;
 }
 
 export function getCalendarForMonth(monthKey: string): CalendarResponse {

@@ -1,7 +1,6 @@
 import { ArrowRightIcon, SparklesIcon } from "lucide-react";
 
 import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,7 +13,7 @@ import type { MonthlyRecapCard as MonthlyRecapCardType } from "@/shared/types/mo
 export function MonthlyRecapCard({ recap }: { recap: MonthlyRecapCardType }) {
   if (recap.status === "generated") {
     return (
-      <Card className="orb-panel bg-[rgb(255_255_255_/_0.84)]">
+      <Card className="orb-panel bg-[var(--surface-glass-soft)]">
         <CardHeader>
           <Badge variant="secondary">Monthly recap</Badge>
           <CardTitle>{recap.title}</CardTitle>
@@ -33,10 +32,10 @@ export function MonthlyRecapCard({ recap }: { recap: MonthlyRecapCardType }) {
               <p>Generated for this month</p>
             </div>
           </div>
-          <Button variant="outline" className="justify-between" disabled>
-            View recap
+          <div className="flex items-center justify-between rounded-xl border border-border/80 bg-background/75 px-3 py-2 text-sm text-muted-foreground">
+            <span>Recap detail view is being prepared.</span>
             <ArrowRightIcon data-icon="inline-end" />
-          </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -44,7 +43,7 @@ export function MonthlyRecapCard({ recap }: { recap: MonthlyRecapCardType }) {
 
   if (recap.status === "ready_to_generate") {
     return (
-      <Card className="bg-[rgb(255_255_255_/_0.82)]">
+      <Card className="bg-[var(--surface-glass-soft)]">
         <CardHeader>
           <Badge variant="secondary">Monthly recap</Badge>
           <CardTitle>Your month has enough material to summarize.</CardTitle>
@@ -55,16 +54,16 @@ export function MonthlyRecapCard({ recap }: { recap: MonthlyRecapCardType }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="outline" disabled>
-            Generate monthly recap
-          </Button>
+          <div className="rounded-xl border border-border/80 bg-background/75 px-3 py-2 text-sm text-muted-foreground">
+            Recap generation trigger will be available in the next build.
+          </div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-[rgb(255_255_255_/_0.82)]">
+    <Card className="bg-[var(--surface-glass-soft)]">
       <CardHeader>
         <Badge variant="secondary">Monthly recap</Badge>
         <CardTitle>More entries will unlock a fuller monthly view.</CardTitle>

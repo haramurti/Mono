@@ -5,6 +5,7 @@ import {
   ToggleGroupItem,
 } from "@/shared/components/ui/toggle-group";
 import { moodMeta } from "@/shared/lib/moods";
+import { cn } from "@/shared/lib/utils";
 import { type Mood, moods } from "@/shared/types/mono";
 
 export function MoodPicker({
@@ -19,7 +20,7 @@ export function MoodPicker({
   return (
     <ToggleGroup
       type="single"
-      value={value ?? undefined}
+      value={value ?? ""}
       onValueChange={(nextValue) => {
         if (nextValue) {
           onSelect(nextValue as Mood);
@@ -34,7 +35,10 @@ export function MoodPicker({
           key={mood}
           value={mood}
           variant="outline"
-          className="h-auto min-w-0 flex-col items-start gap-3 rounded-[1.25rem] bg-card/80 px-4 py-4 text-left"
+          className={cn(
+            "h-auto min-w-0 flex-col items-start gap-3 rounded-[1rem] px-4 py-3 text-left",
+            moodMeta[mood].surfaceClass,
+          )}
         >
           <span className="text-2xl">{moodMeta[mood].emoji}</span>
           <span className="flex flex-col items-start gap-1">

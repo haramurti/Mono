@@ -1,42 +1,14 @@
 "use client";
 
-import { isFuture, isSameMonth, parseISO } from "date-fns";
-import Link from "next/link";
-
+import { DashboardCalendarCell } from "@/features/dashboard/components/dashboard-calendar-cell";
 import {
   buildCalendarDates,
   formatDateKey,
   getTodayDateKey,
 } from "@/shared/lib/date";
-import { getMoodEmoji } from "@/shared/lib/moods";
-import { cn } from "@/shared/lib/utils";
 import type { CalendarDay, JournalState } from "@/shared/types/mono";
 
 const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-function getCellLink(
-  dateKey: string,
-  day: CalendarDay | undefined,
-  todayState: JournalState,
-) {
-  const todayKey = getTodayDateKey();
-
-  if (dateKey === todayKey) {
-    if (todayState.status === "empty" || todayState.status === "in_progress") {
-      return "/chat";
-    }
-
-    if (todayState.status === "summarized" || todayState.status === "edited") {
-      return `/journal/${dateKey}`;
-    }
-  }
-
-  if (day) {
-    return `/journal/${dateKey}`;
-  }
-
-  return null;
-}
 
 export function DashboardCalendar({
   month,
@@ -60,69 +32,21 @@ export function DashboardCalendar({
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-2">
-        {dates.map((date) => {
-          const dateKey = formatDateKey(date);
-          const day = dayMap.get(dateKey);
-          const isCurrentMonth = isSameMonth(date, parseISO(`${month}-01`));
-          const isToday = dateKey === todayKey;
-          const disabled = isFuture(date) || (!day && !isToday);
-          const href = getCellLink(dateKey, day, todayState);
-          const content = (
-            <div
-              className={cn(
-                "flex min-h-28 flex-col rounded-[1.25rem] border border-border/80 bg-card/75 p-3 text-left transition-colors",
-                !isCurrentMonth && "opacity-45",
-                disabled && "cursor-not-allowed opacity-45",
-                isToday && "border-foreground/20 bg-[rgb(255_255_255_/_0.95)]",
-              )}
-            >
-              <div className="flex items-center justify-between text-sm text-foreground">
-                <span>{date.getDate()}</span>
-                <span>{getMoodEmoji(day?.primaryMood)}</span>
-              </div>
-              <div className="mt-4 flex flex-1 flex-col justify-end gap-1">
-                {day ? (
-                  <>
-                    <p className="text-sm leading-snug text-card-foreground">
-                      {day.title}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {day.status === "edited"
-                        ? "Edited reflection"
-                        : "Journal entry"}
-                    </p>
-                  </>
-                ) : isToday ? (
-                  <>
-                    <p className="text-sm leading-snug text-card-foreground">
-                      {todayState.status === "in_progress"
-                        ? "Continue today’s journal"
-                        : "Start today’s journal"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Today is still open.
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    No journal saved.
-                  </p>
-                )}
-              </div>
-            </div>
-          );
-
-          if (!href || disabled) {
-            return <div key={dateKey}>{content}</div>;
-          }
-
-          return (
-            <Link key={dateKey} href={href} className="block">
-              {content}
-            </Link>
-          );
-        })}
+      <div className="pb-2">
+        <div className="grid grid-cols-7 gap-1.5 md:gap-2">
+          {dates.map((date) => {
+            return (
+              <DashboardCalendarCell
+                key={date.toISOString()}
+                date={date}
+                day={dayMap.get(formatDateKey(date))}
+                month={month}
+                todayKey={todayKey}
+                todayState={todayState}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );

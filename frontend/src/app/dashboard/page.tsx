@@ -1,11 +1,5 @@
-import { Suspense } from "react";
-
-import { DashboardContainer } from "@/features/dashboard/containers/dashboard-container";
+import { redirect } from "next/navigation";
 
 export default function DashboardPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
-      <DashboardContainer />
-    </Suspense>
-  );
+  redirect("/history");
 }

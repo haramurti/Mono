@@ -1,15 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
-
 import { hasDemoSession } from "@/shared/lib/auth";
 import { summarizeTodayJournal } from "@/shared/lib/demo-store";
 
 export function POST(request: NextRequest) {
   if (!hasDemoSession(request)) {
     return NextResponse.json(
-      {
-        code: "UNAUTHORIZED",
-        message: "Authentication is required.",
-      },
+      { code: "UNAUTHORIZED", message: "Authentication is required." },
       { status: 401 },
     );
   }
@@ -25,6 +21,5 @@ export function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-
   return NextResponse.json(journal);
 }

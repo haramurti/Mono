@@ -1,0 +1,158 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import {
+  buildInitialMoodMessage,
+  getJournalHref,
+  shouldRedirectToJournal,
+} from "@/features/journal-chat/lib/journal-chat-display";
+import { useCurrentUserQuery } from "@/shared/repository/auth/query";
+import {
+  useSendChatMessageMutation,
+  useTodayChatQuery,
+} from "@/shared/repository/chat/query";
+import { useSummarizeTodayJournalMutation } from "@/shared/repository/journals/query";
+import type { Mood } from "@/shared/types/mono";
+
+function addEscapeListener(onEscape: () => void) {
+  const handleEscape = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      onEscape();
+    }
+  };
+
+  window.addEventListener("keydown", handleEscape);
+
+  return () => {
+    window.removeEventListener("keydown", handleEscape);
+  };
+}
+
+function lockBodyScroll() {
+  const previousOverflow = document.body.style.overflow;
+  document.body.style.overflow = "hidden";
+
+  return () => {
+    document.body.style.overflow = previousOverflow;
+  };
+}
+
+export function useJournalChatController() {
+  const router = useRouter();
+  const [draft, setDraft] = useState("");
+  const [isToolsSheetOpen, setIsToolsSheetOpen] = useState(false);
+  const [isSummaryOfferDismissed, setIsSummaryOfferDismissed] = useState(false);
+
+  const userQuery = useCurrentUserQuery();
+  const todayChatQuery = useTodayChatQuery();
+  const sendMessageMutation = useSendChatMessageMutation();
+  const summarizeMutation = useSummarizeTodayJournalMutation();
+
+  const chat = todayChatQuery.data;
+  const journalHref = getJournalHref(chat);
+
+  useEffect(() => {
+    if (shouldRedirectToJournal(chat) && journalHref) {
+      router.replace(journalHref);
+    }
+  }, [chat, journalHref, router]);
+
+  useEffect(() => {
+    if (!isToolsSheetOpen) {
+      return;
+    }
+
+    const unlockBodyScroll = lockBodyScroll();
+    const removeEscapeListener = addEscapeListener(() => {
+      setIsToolsSheetOpen(false);
+    });
+
+    return () => {
+      unlockBodyScroll();
+      removeEscapeListener();
+    };
+  }, [isToolsSheetOpen]);
+
+  function openToolsSheet() {
+    setIsToolsSheetOpen(true);
+  }
+
+  function closeToolsSheet() {
+    setIsToolsSheetOpen(false);
+  }
+
+  function dismissSummaryOffer() {
+    setIsSummaryOfferDismissed(true);
+  }
+
+  function resetSummaryOffer() {
+    setIsSummaryOfferDismissed(false);
+  }
+
+  function changeDraft(value: string) {
+    setDraft(value);
+  }
+
+  function selectMood(mood: Mood) {
+    if (chat?.initialMood || sendMessageMutation.isPending) {
+      return;
+    }
+
+    resetSummaryOffer();
+    closeToolsSheet();
+    sendMessageMutation.mutate({
+      content: buildInitialMoodMessage(mood),
+      initialMood: mood,
+    });
+  }
+
+  function sendMessage() {
+    const content = draft.trim();
+
+    if (!content) {
+      return;
+    }
+
+    resetSummaryOffer();
+    sendMessageMutation.mutate(
+      { content },
+      {
+        onSuccess: () => {
+          setDraft("");
+        },
+      },
+    );
+  }
+
+  function summarizeJournal() {
+    summarizeMutation.mutate(undefined, {
+      onSuccess: (journal) => {
+        router.push(`/journal/${journal.date}`);
+      },
+    });
+  }
+
+  return {
+    chat,
+    closeToolsSheet,
+    draft,
+    changeDraft,
+    dismissSummaryOffer,
+    isBusy:
+      todayChatQuery.isLoading ||
+      sendMessageMutation.isPending ||
+      summarizeMutation.isPending,
+    isChatLoading: todayChatQuery.isLoading,
+    isSendPending: sendMessageMutation.isPending,
+    isSummarizePending: summarizeMutation.isPending,
+    isSummaryOfferDismissed,
+    isToolsSheetOpen,
+    openToolsSheet,
+    selectMood,
+    sendMessage,
+    summarizeJournal,
+    user: userQuery.data,
+  };
+}

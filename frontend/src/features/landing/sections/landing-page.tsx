@@ -1,253 +1,323 @@
-import { ArrowRightIcon, HeartHandshakeIcon, SparklesIcon } from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/shared/components/ui/alert";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
-import { Separator } from "@/shared/components/ui/separator";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
-const featureHighlights = [
+const guidedSteps = [
   {
-    title: "Start from a feeling",
+    id: "01",
+    title: "Name the feeling first",
     description:
-      "A mood picker helps the first step feel smaller when a blank page feels too sharp.",
+      "You do not have to explain everything at once. Pick the feeling that is closest to the surface.",
   },
   {
-    title: "Reflect with gentle prompts",
+    id: "02",
+    title: "Stay with one prompt",
     description:
-      "Mono replies with one calm question at a time, so the conversation never turns into pressure.",
+      "Mono follows with one calm question, so the page never turns back into a blank one.",
   },
   {
-    title: "Return to patterns over time",
+    id: "03",
+    title: "Leave with something shaped",
     description:
-      "Your dashboard turns scattered days into a quieter view of mood, rhythm, and change.",
+      "When the reflection is done, the entry becomes a journal you can revisit without re-reading the whole conversation.",
   },
+];
+
+const moodChips = ["Tired", "Unsettled", "Hopeful"];
+
+const reflectionNotes = [
+  "Mood comes first, writing comes second.",
+  "Short prompts keep the pace calm.",
+  "The summary keeps what mattered.",
 ];
 
 export function LandingPage() {
   return (
-    <main className="relative overflow-hidden">
-      <div className="absolute inset-x-0 top-0 -z-10 mx-auto h-[34rem] max-w-7xl">
-        <div className="absolute left-0 top-8 size-64 rounded-full bg-[radial-gradient(circle,var(--gradient-mint),transparent_70%)] blur-3xl" />
-        <div className="absolute right-0 top-0 size-80 rounded-full bg-[radial-gradient(circle,var(--gradient-peach),transparent_70%)] blur-3xl" />
-        <div className="absolute right-32 top-48 size-72 rounded-full bg-[radial-gradient(circle,var(--gradient-lavender),transparent_70%)] blur-3xl" />
-      </div>
+    <main className="min-h-screen bg-background px-5 py-5 md:px-8 md:py-7">
+      <div className="mx-auto w-full rounded-[2rem] border border-border/80 bg-[var(--surface-glass)] p-4 shadow-sm md:p-6">
+        <header className="border-b border-border/70 pb-5 md:pb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Link href="/" className="flex items-center gap-3">
+              <span className="grid size-9 place-items-center rounded-xl bg-foreground text-sm font-semibold text-background">
+                M
+              </span>
+              <span className="text-sm font-semibold tracking-tight">Mono</span>
+            </Link>
 
-      <section className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-6 pb-20 pt-8 md:px-10 lg:px-14">
-        <header className="flex items-center justify-between border-b border-border/70 pb-5">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-full bg-primary text-center text-lg leading-10 text-primary-foreground">
-              M
-            </div>
-            <div>
-              <p className="eyebrow">Mono</p>
-              <p className="text-sm text-muted-foreground">
-                AI-guided journaling for quieter reflection
-              </p>
+            <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
+              <a href="#how-it-works" className="hover:text-foreground">
+                How it works
+              </a>
+              <a href="#preview" className="hover:text-foreground">
+                Preview
+              </a>
+            </nav>
+
+            <div className="flex items-center gap-2 text-sm sm:gap-3">
+              <Link
+                href="/api/demo-login"
+                className="inline-flex h-10 items-center rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground"
+              >
+                Login
+              </Link>
+              <Button asChild size="sm">
+                <Link href="/api/demo-login">Start reflection</Link>
+              </Button>
             </div>
           </div>
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/api/demo-login">
-              Journal now
-              <ArrowRightIcon data-icon="inline-end" />
-            </Link>
-          </Button>
+
+          <div className="mt-5 flex gap-2 md:hidden">
+            <a
+              href="#how-it-works"
+              className="inline-flex h-10 items-center rounded-full border border-border/80 bg-background/70 px-4 text-sm text-muted-foreground"
+            >
+              How it works
+            </a>
+            <a
+              href="#preview"
+              className="inline-flex h-10 items-center rounded-full border border-border/80 bg-background/70 px-4 text-sm text-muted-foreground"
+            >
+              Preview
+            </a>
+          </div>
         </header>
 
-        <div className="grid flex-1 gap-14 pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div className="flex flex-col gap-8">
-            <Badge>Calm companion for your thoughts</Badge>
-            <div className="flex flex-col gap-6">
-              <h1 className="display-mega max-w-4xl text-balance">
-                Start with a feeling.
-                <br />
-                Mono guides the rest.
-              </h1>
-              <p className="body-copy max-w-2xl text-balance">
-                When journaling feels too blank to begin, Mono helps you name
-                the day gently, reflect through a short guided conversation, and
-                leave with a journal entry that sounds like you.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href="/api/demo-login">
-                  Enter the demo
-                  <ArrowRightIcon data-icon="inline-end" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="#how-it-works">See how Mono helps</Link>
-              </Button>
-            </div>
-            <div className="grid gap-5 text-sm text-muted-foreground sm:grid-cols-3">
+        <section className="relative overflow-hidden py-12 md:py-18">
+          <div className="absolute inset-x-[22%] top-10 -z-10 h-28 rounded-full bg-secondary/25 blur-2xl" />
+          <div className="grid gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
+            <div className="flex flex-col justify-between gap-10">
               <div>
-                <p className="eyebrow">For the blank-page moment</p>
-                <p className="mt-2 leading-relaxed">
-                  Start from mood instead of forcing the perfect first sentence.
+                <Badge variant="secondary">Guided daily journaling</Badge>
+
+                <h1 className="display-xl mt-6 max-w-2xl text-balance">
+                  Start with the feeling, not with the pressure to explain
+                  everything.
+                </h1>
+
+                <p className="mt-6 max-w-xl text-base leading-8 text-muted-foreground">
+                  Mono helps you begin gently, stay with one clear prompt, and
+                  leave with a reflection that feels settled enough to keep.
                 </p>
               </div>
-              <div>
-                <p className="eyebrow">For daily clarity</p>
-                <p className="mt-2 leading-relaxed">
-                  Let one calm question at a time turn noise into reflection.
+
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg">
+                  <Link href="/api/demo-login">
+                    Start reflection
+                    <ArrowRightIcon data-icon="inline-end" />
+                  </Link>
+                </Button>
+
+                <Button asChild variant="outline" size="lg">
+                  <a href="#preview">See the flow</a>
+                </Button>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-border/75 bg-background/82 p-5 md:p-6">
+                <p className="eyebrow">What changes</p>
+                <p className="mt-3 max-w-2xl text-base leading-8 text-foreground/88">
+                  Journaling should feel like being met where you are, not being
+                  asked to perform clarity on demand. No blank page, no long
+                  setup, no pressure to get it right on the first sentence.
                 </p>
               </div>
-              <div>
-                <p className="eyebrow">For patterns over time</p>
-                <p className="mt-2 leading-relaxed">
-                  Revisit mood history and notice how the month has been moving.
+            </div>
+
+            <div className="grid gap-5">
+              <div className="rounded-[1.75rem] border border-border/80 bg-[var(--surface-glass-soft)] p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="eyebrow">Tonight&apos;s entry</p>
+                    <h2 className="mt-3 text-2xl font-semibold tracking-tight">
+                      Evening check-in
+                    </h2>
+                  </div>
+
+                  <span className="rounded-full border border-border/70 px-3 py-1 text-xs text-muted-foreground">
+                    3 min
+                  </span>
+                </div>
+
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {moodChips.map((mood) => (
+                    <span
+                      key={mood}
+                      className="rounded-full border border-border/80 bg-background/75 px-3 py-1.5 text-sm text-muted-foreground"
+                    >
+                      {mood}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-7 grid gap-4 md:grid-cols-[0.72fr_1fr]">
+                  <div className="rounded-[1.35rem] bg-secondary/30 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Mono asks
+                    </p>
+                    <p className="mt-3 text-sm leading-7 text-foreground/85">
+                      What part of today stayed with you after everything else
+                      moved on?
+                    </p>
+                  </div>
+
+                  <div className="rounded-[1.35rem] border border-border/80 bg-card/80 p-4">
+                    <p className="text-sm leading-7 text-muted-foreground">
+                      I kept thinking about how scattered the day felt. It was
+                      not dramatic, just a quiet accumulation of unfinished
+                      things that never really let go.
+                    </p>
+
+                    <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4">
+                      <span className="text-xs text-muted-foreground">
+                        Continue when you are ready
+                      </span>
+                      <Button size="icon-sm" aria-label="Continue journaling">
+                        <ArrowRightIcon />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.25rem] bg-background/55 px-4 py-3 text-sm text-muted-foreground">
+                <p className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+                  {reflectionNotes.map((note, index) => (
+                    <span key={note} className="flex items-center gap-3">
+                      {index > 0 ? (
+                        <span
+                          aria-hidden="true"
+                          className="hidden size-1.5 rounded-full bg-muted-foreground/40 sm:block"
+                        />
+                      ) : null}
+                      <span>{note}</span>
+                    </span>
+                  ))}
                 </p>
               </div>
             </div>
           </div>
+        </section>
 
-          <Card className="orb-panel border-border/70 bg-[rgb(255_255_255_/_0.82)] backdrop-blur">
-            <CardHeader>
-              <Badge variant="secondary">Guided reflection</Badge>
-              <CardTitle>
-                Today doesn’t have to start with a blank text box.
-              </CardTitle>
-              <CardDescription>
-                Mono begins with the emotional signal, then asks one short
-                follow-up at a time until the shape of the day becomes clearer.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <div className="rounded-[1.25rem] border border-border/80 bg-background/80 p-5">
-                <p className="eyebrow">Mood prompt</p>
-                <p className="mt-3 text-2xl">😴 Tired</p>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  “Thank you for starting from that feeling. What part of today
-                  has felt the heaviest?”
-                </p>
-              </div>
-              <div className="rounded-[1.25rem] border border-border/80 bg-card p-5">
-                <p className="eyebrow">Daily reflection output</p>
-                <p className="mt-4 text-sm leading-relaxed text-card-foreground">
-                  “Today I felt mentally tired because there were many things on
-                  my mind. I realized I’ve been asking myself to carry too much
-                  at once, and what I need most is a smaller, kinder pace.”
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      <section
-        id="how-it-works"
-        className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-6 py-20 md:px-10 lg:px-14"
-      >
-        <div className="max-w-2xl">
-          <p className="eyebrow">Why Mono exists</p>
-          <h2 className="display-xl mt-4 text-balance">
-            Journaling often fails before it begins.
-          </h2>
-          <p className="body-copy mt-5 text-balance">
-            The friction is rarely about writing skill. It is usually about not
-            knowing where to enter the day. Mono lowers that barrier with mood,
-            conversation, and a calmer path into self-reflection.
-          </p>
-        </div>
-        <div className="grid gap-5 lg:grid-cols-3">
-          {featureHighlights.map((feature) => (
-            <Card key={feature.title} size="sm" className="bg-card/85">
-              <CardHeader>
-                <CardTitle>{feature.title}</CardTitle>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-6 py-20 md:px-10 lg:px-14">
-        <Separator />
-        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-          <div className="max-w-xl">
-            <p className="eyebrow">How Mono helps</p>
-            <h2 className="display-lg mt-4 text-balance">
-              Less pressure, more signal.
-            </h2>
-          </div>
-          <div className="grid gap-4">
-            <Card size="sm" className="bg-card/80">
-              <CardHeader>
-                <CardTitle>Pick a mood before you write</CardTitle>
-                <CardDescription>
-                  A feeling is easier to reach for than a perfect opening line.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card size="sm" className="bg-card/80">
-              <CardHeader>
-                <CardTitle>Let Mono ask the next small question</CardTitle>
-                <CardDescription>
-                  Responses stay short, warm, and non-judgmental so the flow
-                  stays reflective instead of clinical.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card size="sm" className="bg-card/80">
-              <CardHeader>
-                <CardTitle>Return to the month with context</CardTitle>
-                <CardDescription>
-                  Dashboard history makes it easier to notice rhythm,
-                  repetition, and the emotional weather of your days.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-20 md:px-10 lg:px-14">
-        <Alert className="bg-card/85">
-          <HeartHandshakeIcon />
-          <AlertTitle>Gentle support, not therapy</AlertTitle>
-          <AlertDescription>
-            Mono is a wellbeing companion for reflection and journaling. It is
-            not a clinical tool, and it should not replace professional mental
-            health support.
-          </AlertDescription>
-        </Alert>
-
-        <Card className="orb-panel border-border/70 bg-[rgb(255_255_255_/_0.78)]">
-          <CardHeader>
-            <Badge variant="secondary">Ready for the demo</Badge>
-            <CardTitle>From blank thoughts to clear reflection.</CardTitle>
-            <CardDescription>
-              The demo includes seeded journal history, a working guided chat,
-              and a calm dashboard for revisiting mood over time.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <SparklesIcon className="size-4" />
-              Mood picker, AI-guided prompts, summary generation, and calendar
-              history.
+        <section
+          id="how-it-works"
+          className="border-t border-border/70 pt-12 md:pt-16"
+        >
+          <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:gap-14">
+            <div>
+              <p className="eyebrow">How it works</p>
+              <h2 className="display-md mt-4 max-w-md text-balance">
+                A calmer path from feeling something to understanding it.
+              </h2>
             </div>
-            <Button asChild size="lg">
-              <Link href="/api/demo-login">
-                Journal now
-                <ArrowRightIcon data-icon="inline-end" />
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </section>
+
+            <div className="space-y-5">
+              {guidedSteps.map((step) => (
+                <div
+                  key={step.id}
+                  className="grid gap-3 rounded-[1.5rem] border border-border/75 bg-card/60 p-5 md:grid-cols-[4.5rem_1fr] md:gap-4 md:p-6"
+                >
+                  <div className="text-sm font-semibold tracking-[0.18em] text-muted-foreground">
+                    {step.id}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold tracking-tight text-foreground">
+                      {step.title}
+                    </h3>
+                    <p className="mt-1.5 max-w-2xl text-sm leading-7 text-muted-foreground">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="preview" className="mt-12 md:mt-16">
+          <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:gap-10">
+            <Card className="overflow-hidden bg-background/90">
+              <CardContent className="p-5 md:p-6">
+                <Badge variant="secondary">Reflection ready</Badge>
+
+                <h2 className="display-md mt-5 max-w-md text-balance">
+                  Keep the raw entry, leave with the part you need to remember.
+                </h2>
+
+                <p className="mt-5 max-w-md text-sm leading-7 text-muted-foreground">
+                  Mono keeps the original conversation, then shapes it into a
+                  summary you can return to later without sorting through every
+                  sentence again.
+                </p>
+
+                <div className="mt-9 space-y-3">
+                  <div className="rounded-[1rem] border border-border/80 bg-background/80 p-4">
+                    <p className="text-sm font-medium">What stood out</p>
+                    <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                      You were not only tired. You were carrying several small
+                      unresolved things at once.
+                    </p>
+                  </div>
+
+                  <div className="rounded-[1rem] border border-border/80 bg-background/80 p-4">
+                    <p className="text-sm font-medium">Pattern to notice</p>
+                    <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                      The day felt heavier when nothing had a clear stopping
+                      point.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex flex-col justify-between gap-8 rounded-[1.75rem] border border-border/80 bg-secondary/20 p-5 md:p-6">
+              <div>
+                <p className="eyebrow">Why it helps</p>
+                <h2 className="display-md mt-4 max-w-lg text-balance">
+                  Reflection becomes easier when the next step is always clear.
+                </h2>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[1.2rem] bg-background/60 p-4">
+                  <p className="text-sm font-medium text-foreground">
+                    One prompt at a time
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                    You are never asked to organize the whole day in one go.
+                  </p>
+                </div>
+
+                <div className="rounded-[1.2rem] bg-background/60 p-4">
+                  <p className="text-sm font-medium text-foreground">
+                    A record worth revisiting
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                    The journal keeps both the feeling and the shape it became.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-[1.35rem] border border-border/80 bg-background/85 p-6">
+                <p className="max-w-xl text-base leading-8 text-foreground/85">
+                  Mono is for the moment when you know something about the day
+                  is still sitting with you, but you do not want to wrestle a
+                  blank page to figure out what it is.
+                </p>
+
+                <Button asChild size="lg" className="mt-6 w-fit">
+                  <Link href="/api/demo-login">
+                    Start reflection
+                    <ArrowRightIcon data-icon="inline-end" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

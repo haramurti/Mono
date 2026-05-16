@@ -209,6 +209,52 @@ Presentational component rules:
 - Avoid direct query/mutation calls in presentational components.
 - Keep heavy orchestration in containers or hooks.
 
+Interactive app page composition rules:
+
+- These rules apply to interactive app/dashboard pages and interactive feature flows.
+- Containers are the composition layer for interactive pages.
+- Containers may assemble leaf components, section components, controller hooks, and pure helper/selector functions.
+- Prefer leaf-first or section-first composition over a single page-wide view wrapper.
+- Presentational components must receive narrow, purpose-specific props.
+- Do not pass one broad page-wide prop bag into a monolithic `*View` component unless there is a strong, explicit justification.
+- Presentational components must not import from feature controller hook files.
+- Presentational components must not depend on controller hook result types.
+- Controller hooks may own query/mutation orchestration, router integration, search-param integration, local UI state, and event handlers.
+- Controller hooks must not export page-wide `*ViewModel` objects intended to drive a whole presentational tree.
+- Prefer pure helper/selectors for display derivation such as labels, formatting, status mapping, and lightweight UI shaping.
+- If logic is too cluttered to keep inline, extract a dedicated function with an explicit name.
+- Compound component APIs are allowed only when they improve discoverability and still keep data flow explicit and props-first.
+- Context-heavy compound patterns are disallowed by default.
+- Use feature-local context only when sibling subtree coordination makes props genuinely unreasonable.
+
+Valid seam for interactive pages:
+
+- Container: assembles the page from sections/leaves.
+- Controller hook: owns orchestration and state transitions.
+- Helper/selector: owns pure display derivation.
+- Presentational component: renders UI from explicit props only.
+
+Avoid pattern:
+
+```tsx
+const viewModel = useFeatureViewModel();
+return <FeatureView {...viewModel} />;
+```
+
+Preferred pattern:
+
+```tsx
+const controller = useFeatureController();
+const headerLabel = getHeaderLabel(controller.data);
+
+return (
+   <FeatureShell>
+      <FeatureHeader label={headerLabel} onOpen={controller.openPanel} />
+      <FeatureSection items={mapItems(controller.data)} />
+   </FeatureShell>
+);
+```
+
 ## Styling Rules
 
 Use:
@@ -665,6 +711,9 @@ When implementing a task:
 9. Use repository functions for data access.
 10.   Use containers/hooks for orchestration.
 11.   Use presentational components for UI rendering.
+12.   Validate that every new abstraction creates a real seam, not just moves coupling elsewhere.
+13.   Prefer controller hook + helper functions + container composition over page-wide view-model wrappers.
+14.   If a wrapper component does not improve reuse, readability, or composition, do not create it.
 
 ## Do Not Do
 
@@ -681,6 +730,11 @@ Do not:
 - Create cross-feature coupling casually.
 - Use relative import chains like `../../../shared`.
 - Mix transport logic, orchestration, and UI in one component.
+- Create page-wide `*ViewModel` objects for presentational trees in interactive app pages.
+- Create monolithic `*View.tsx` wrappers for interactive app pages when the container can compose smaller sections directly.
+- Make presentational components depend on controller hook result types.
+- Hide page assembly behind one broad prop object unless there is a strong documented exception.
+- Use context-heavy compound component patterns by default.
 
 ## When Unsure
 
@@ -696,4 +750,9 @@ Default decisions:
 - Put list params in URL search params.
 - Use invalidate-query mutation flow.
 - Use optimistic update only when specifically useful.
+- For interactive pages, compose UI in the container.
+- Put orchestration in a controller hook.
+- Put display derivation in pure helper functions.
+- Keep section and leaf components props-first.
+- If inline logic becomes hard to scan, extract a dedicated function.
 ````

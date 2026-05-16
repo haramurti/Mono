@@ -147,6 +147,26 @@ export type MonthlyRecap = {
   updatedAt: string;
 };
 
+export type MonthlyRecapNotEnoughData = {
+  month: string;
+  status: "not_enough_data";
+  journalCount: number;
+  minimumRequired: number;
+  message: string;
+};
+
+export type MonthlyRecapReadyToGenerate = {
+  month: string;
+  status: "ready_to_generate";
+  journalCount: number;
+  minimumRequired: number;
+};
+
+export type MonthlyRecapResponse =
+  | MonthlyRecap
+  | MonthlyRecapNotEnoughData
+  | MonthlyRecapReadyToGenerate;
+
 export type CalendarResponse = {
   month: string;
   streak: number;
