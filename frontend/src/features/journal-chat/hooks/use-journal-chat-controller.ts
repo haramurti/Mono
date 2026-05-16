@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useJournalChatSearchParams } from "@/features/journal-chat/hooks/use-journal-chat-search-params";
 import {
   buildInitialMoodMessage,
   getJournalHref,
   shouldRedirectToJournal,
 } from "@/features/journal-chat/lib/journal-chat-display";
+import { toast } from "@/shared/components/ui/sonner";
 import { useCurrentUserQuery } from "@/shared/repository/auth/query";
 import {
   useSendChatMessageMutation,
@@ -44,6 +46,7 @@ export function useJournalChatController() {
   const [draft, setDraft] = useState("");
   const [isToolsSheetOpen, setIsToolsSheetOpen] = useState(false);
   const [isSummaryOfferDismissed, setIsSummaryOfferDismissed] = useState(false);
+  const { isContinuing, setIsContinuing } = useJournalChatSearchParams();
 
   const userQuery = useCurrentUserQuery();
   const todayChatQuery = useTodayChatQuery();
@@ -54,10 +57,23 @@ export function useJournalChatController() {
   const journalHref = getJournalHref(chat);
 
   useEffect(() => {
-    if (shouldRedirectToJournal(chat) && journalHref) {
+    if (!isContinuing && shouldRedirectToJournal(chat) && journalHref) {
       router.replace(journalHref);
     }
-  }, [chat, journalHref, router]);
+  }, [chat, isContinuing, journalHref, router]);
+
+  useEffect(() => {
+    if (!isContinuing) {
+      return;
+    }
+
+    if (
+      chat?.journalState.status === "in_progress" ||
+      chat?.journalState.status === "empty"
+    ) {
+      void setIsContinuing(null);
+    }
+  }, [chat?.journalState.status, isContinuing, setIsContinuing]);
 
   useEffect(() => {
     if (!isToolsSheetOpen) {
@@ -131,7 +147,17 @@ export function useJournalChatController() {
       onSuccess: (journal) => {
         router.push(`/journal/${journal.date}`);
       },
+      onError: () => {
+        toast.error("Couldn’t summarize your journal.", {
+          description: "Your chat is saved. Try again in a moment.",
+        });
+      },
     });
+  }
+
+  function retrySummarize() {
+    summarizeMutation.reset();
+    summarizeJournal();
   }
 
   return {
@@ -150,8 +176,10 @@ export function useJournalChatController() {
     isSummaryOfferDismissed,
     isToolsSheetOpen,
     openToolsSheet,
+    retrySummarize,
     selectMood,
     sendMessage,
+    summarizeError: summarizeMutation.error,
     summarizeJournal,
     user: userQuery.data,
   };

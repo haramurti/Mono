@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { QueryProvider } from "@/shared/components/providers/query-provider";
+import { Toaster } from "@/shared/components/ui/sonner";
 import { cn } from "@/shared/lib/utils";
 
 import "./globals.css";
@@ -17,10 +18,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("h-full scroll-smooth")}>
-      <body className="min-h-full bg-background text-foreground antialiased">
-        <QueryProvider>{children}</QueryProvider>
-      </body>
-    </html>
+     <html lang="en" className={cn('h-full scroll-smooth')}>
+        <body className="min-h-full bg-background text-foreground antialiased overflow-y-scroll">
+           <QueryProvider>{children}</QueryProvider>
+           <Toaster />
+        </body>
+     </html>
   );
 }

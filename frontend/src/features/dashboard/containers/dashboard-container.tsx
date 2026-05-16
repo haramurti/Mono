@@ -30,8 +30,11 @@ import { formatMonthLabel } from "@/shared/lib/date";
 export function DashboardContainer() {
   const {
     calendarQuery,
+    generateRecap,
+    generateRecapError,
     goToNextMonth,
     goToPreviousMonth,
+    isGeneratingRecap,
     month,
     todayChatQuery,
     user,
@@ -103,7 +106,13 @@ export function DashboardContainer() {
               streakLabel={getStreakLabel(calendarQuery.data?.streak)}
             />
             {calendarQuery.data ? (
-              <MonthlyRecapCard recap={calendarQuery.data.monthlyRecap} />
+              <MonthlyRecapCard
+                recap={calendarQuery.data.monthlyRecap}
+                isGenerating={isGeneratingRecap}
+                hasError={Boolean(generateRecapError)}
+                onGenerate={generateRecap}
+                onRetry={generateRecap}
+              />
             ) : (
               <Skeleton className="h-72 rounded-[1.5rem]" />
             )}

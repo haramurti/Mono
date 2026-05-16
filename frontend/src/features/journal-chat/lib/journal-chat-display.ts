@@ -35,7 +35,7 @@ export function getMoodBadgeProps(initialMood: Mood | null | undefined) {
 
   return {
     label: "Mood not selected",
-    variant: "outline" as const,
+    variant: "ghost" as const,
   };
 }
 

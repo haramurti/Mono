@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { journalQueryKeys } from "@/shared/repository/journals/query";
 import {
   generateMonthlyRecap,
   getMonthlyRecap,
@@ -30,6 +31,9 @@ export function useGenerateMonthlyRecapMutation() {
       generateMonthlyRecap(payload),
     onSuccess: (recap) => {
       queryClient.invalidateQueries({ queryKey: recapsQueryKeys.monthlyRoot });
+      queryClient.invalidateQueries({
+        queryKey: journalQueryKeys.calendarRoot,
+      });
       queryClient.setQueryData(recapsQueryKeys.monthly(recap.month), recap);
     },
   });

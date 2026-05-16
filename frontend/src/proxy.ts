@@ -8,6 +8,8 @@ const protectedPrefixes = [
   "/dashboard",
   "/chat",
   "/journal",
+  "/recaps",
+  "/profile",
 ];
 
 export function proxy(request: NextRequest) {
@@ -29,5 +31,7 @@ export const config = {
     "/dashboard/:path*",
     "/chat/:path*",
     "/journal/:path*",
+    "/recaps/:path*",
+    "/profile/:path*",
   ],
 };

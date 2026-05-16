@@ -3,7 +3,8 @@
 import { isFuture, isSameMonth, parseISO } from "date-fns";
 import Link from "next/link";
 
-import { formatDateKey } from "@/shared/lib/date";
+import { toast } from "@/shared/components/ui/sonner";
+import { formatDateKey, formatLongDate } from "@/shared/lib/date";
 import { getMoodEmoji } from "@/shared/lib/moods";
 import { cn } from "@/shared/lib/utils";
 import type { CalendarDay, JournalState } from "@/shared/types/mono";
@@ -65,6 +66,23 @@ function getCellLink(
   return null;
 }
 
+function buildCellClassName({
+  isCurrentMonth,
+  isDisabled,
+  isToday,
+}: {
+  isCurrentMonth: boolean;
+  isDisabled: boolean;
+  isToday: boolean;
+}) {
+  return cn(
+    "flex min-h-[6.8rem] flex-col rounded-[1.1rem] border border-border/80 bg-card/75 p-2.5 text-left transition-colors md:min-h-[8.1rem] md:p-3",
+    !isCurrentMonth && "opacity-45",
+    isDisabled && "cursor-not-allowed opacity-45",
+    isToday && "border-foreground/20 bg-[var(--surface-glass-solid)]",
+  );
+}
+
 export function DashboardCalendarCell({
   date,
   day,
@@ -75,17 +93,19 @@ export function DashboardCalendarCell({
   const dateKey = formatDateKey(date);
   const isCurrentMonth = isSameMonth(date, parseISO(`${month}-01`));
   const isToday = dateKey === todayKey;
-  const disabled = isFuture(date) || (!day && !isToday);
+  const isFutureDate = isFuture(date);
+  const isPastEmpty = !day && !isToday && !isFutureDate;
+  const isDisabled = isFutureDate || (!day && !isToday);
   const href = getCellLink(dateKey, day, todayKey, todayState);
-  const content = (
-    <div
-      className={cn(
-        "flex min-h-[6.8rem] flex-col rounded-[1.1rem] border border-border/80 bg-card/75 p-2.5 text-left transition-colors md:min-h-[8.1rem] md:p-3",
-        !isCurrentMonth && "opacity-45",
-        disabled && "cursor-not-allowed opacity-45",
-        isToday && "border-foreground/20 bg-[var(--surface-glass-solid)]",
-      )}
-    >
+  const ariaLabel = buildCellAriaLabel(date, day, isToday);
+  const cellClassName = buildCellClassName({
+    isCurrentMonth,
+    isDisabled,
+    isToday,
+  });
+
+  const inner = (
+    <>
       <div className="flex items-center justify-between text-sm text-foreground">
         <span>{date.getDate()}</span>
         <span>{getMoodEmoji(day?.primaryMood)}</span>
@@ -115,20 +135,43 @@ export function DashboardCalendarCell({
           <p className="text-xs text-muted-foreground">No journal saved.</p>
         )}
       </div>
-    </div>
+    </>
   );
 
-  if (!href || disabled) {
-    return <div title={buildCellAriaLabel(date, day, isToday)}>{content}</div>;
+  if (href) {
+    return (
+      <Link href={href} className="block" aria-label={ariaLabel}>
+        <div className={cellClassName}>{inner}</div>
+      </Link>
+    );
+  }
+
+  if (isPastEmpty) {
+    return (
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        className={cn(cellClassName, "w-full text-left")}
+        onClick={() => {
+          toast("No journal entry for this date.", {
+            description: formatLongDate(dateKey),
+          });
+        }}
+      >
+        {inner}
+      </button>
+    );
   }
 
   return (
-    <Link
-      href={href}
-      className="block"
-      aria-label={buildCellAriaLabel(date, day, isToday)}
+    <div
+      role="presentation"
+      aria-label={ariaLabel}
+      aria-disabled="true"
+      className={cellClassName}
+      title={ariaLabel}
     >
-      {content}
-    </Link>
+      {inner}
+    </div>
   );
 }

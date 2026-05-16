@@ -3,6 +3,7 @@
 import { JournalChatComposer } from "@/features/journal-chat/components/journal-chat-composer";
 import { JournalChatHeader } from "@/features/journal-chat/components/journal-chat-header";
 import { JournalChatMessageList } from "@/features/journal-chat/components/journal-chat-message-list";
+import { JournalChatSummaryError } from "@/features/journal-chat/components/journal-chat-summary-error";
 import { JournalChatSummaryOffer } from "@/features/journal-chat/components/journal-chat-summary-offer";
 import { JournalChatSurface } from "@/features/journal-chat/components/journal-chat-surface";
 import { JournalChatToolsSheet } from "@/features/journal-chat/components/journal-chat-tools-sheet";
@@ -29,11 +30,14 @@ export function JournalChatContainer() {
     dismissSummaryOffer,
     isBusy,
     isChatLoading,
+    isSummarizePending,
     isSummaryOfferDismissed,
     isToolsSheetOpen,
     openToolsSheet,
+    retrySummarize,
     selectMood,
     sendMessage,
+    summarizeError,
     summarizeJournal,
     user,
   } = useJournalChatController();
@@ -42,21 +46,25 @@ export function JournalChatContainer() {
   const moodBadge = getMoodBadgeProps(chat?.initialMood);
   const messageItems = mapChatMessagesForDisplay(chat?.messages, user?.name);
   const userMessageCount = chat?.journalState.userMessageCount ?? 0;
+
   const helperText = getHelperText({
     canSummarize: chat?.actions.canSummarize,
     initialMood: chat?.initialMood,
     isLoading: isChatLoading,
     userMessageCount,
   });
+
   const showSummaryOffer = shouldShowSummaryOffer({
     offerDismissed: isSummaryOfferDismissed,
     shouldOfferSummary: chat?.actions.shouldOfferSummary,
   });
+
   const isComposerDisabled = !chat?.initialMood || isBusy;
   const isSendDisabled = !draft.trim() || isBusy;
   const isSummarizeDisabled =
     !chat?.initialMood || !chat?.actions.canSummarize || isBusy;
   const moodPickerDisabled = Boolean(chat?.initialMood) || isBusy;
+
   const toolsSummaryStateLabel = getSummaryStateLabel(
     chat?.actions.canSummarize,
   );
@@ -82,6 +90,7 @@ export function JournalChatContainer() {
           onSelect={selectMood}
           disabled={moodPickerDisabled}
         />
+
         {showSummaryOffer ? (
           <JournalChatSummaryOffer
             onDismiss={dismissSummaryOffer}
@@ -92,14 +101,53 @@ export function JournalChatContainer() {
     );
   }
 
+  function renderEmptyStateToolsContent() {
+     if (isChatLoading) {
+        return (
+           <div className="grid w-full max-w-md grid-cols-2 gap-3">
+              {Array.from({ length: 8 }, (_, index) => (
+                 <Skeleton
+                    key={`empty-mood-skeleton-${index + 1}`}
+                    className="h-20 rounded-xl"
+                 />
+              ))}
+           </div>
+        );
+     }
+
+     return (
+        <div className="mx-auto flex w-full max-w-md flex-col gap-4 rounded-2xl bg-card/60 p-4">
+           <div className="space-y-1 text-center">
+              <h2 className="text-base font-medium text-foreground">
+                 How are you feeling today?
+              </h2>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                 Pick a mood to start your journal check-in, then write whatever
+                 feels most true.
+              </p>
+           </div>
+
+           <MoodPicker
+              value={chat?.initialMood ?? null}
+              onSelect={selectMood}
+              disabled={moodPickerDisabled}
+           />
+
+           {showSummaryOffer ? (
+              <JournalChatSummaryOffer
+                 onDismiss={dismissSummaryOffer}
+                 onSummarize={summarizeJournal}
+              />
+           ) : null}
+        </div>
+     );
+  }
+
   function renderEmptyState() {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
-          Open tools, set your mood, then write the first thing that feels most
-          true today.
-        </div>
-      </div>
+       <div className="flex flex-1 items-center justify-center px-4 py-8">
+          {renderEmptyStateToolsContent()}
+       </div>
     );
   }
 
@@ -120,6 +168,13 @@ export function JournalChatContainer() {
             messages={messageItems}
             emptyState={renderEmptyState()}
           />
+
+          {summarizeError ? (
+            <JournalChatSummaryError
+              isRetrying={isSummarizePending}
+              onRetry={retrySummarize}
+            />
+          ) : null}
 
           <JournalChatComposer
             draft={draft}

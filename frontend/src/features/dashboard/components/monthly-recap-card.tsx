@@ -1,6 +1,9 @@
-import { ArrowRightIcon, SparklesIcon } from "lucide-react";
+import { ArrowRightIcon, Loader2Icon, SparklesIcon } from "lucide-react";
+import Link from "next/link";
 
+import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
 import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,7 +13,21 @@ import {
 } from "@/shared/components/ui/card";
 import type { MonthlyRecapCard as MonthlyRecapCardType } from "@/shared/types/mono";
 
-export function MonthlyRecapCard({ recap }: { recap: MonthlyRecapCardType }) {
+type MonthlyRecapCardProps = {
+  recap: MonthlyRecapCardType;
+  isGenerating: boolean;
+  hasError: boolean;
+  onGenerate: () => void;
+  onRetry: () => void;
+};
+
+export function MonthlyRecapCard({
+  recap,
+  isGenerating,
+  hasError,
+  onGenerate,
+  onRetry,
+}: MonthlyRecapCardProps) {
   if (recap.status === "generated") {
     return (
       <Card className="orb-panel bg-[var(--surface-glass-soft)]">
@@ -32,10 +49,12 @@ export function MonthlyRecapCard({ recap }: { recap: MonthlyRecapCardType }) {
               <p>Generated for this month</p>
             </div>
           </div>
-          <div className="flex items-center justify-between rounded-xl border border-border/80 bg-background/75 px-3 py-2 text-sm text-muted-foreground">
-            <span>Recap detail view is being prepared.</span>
-            <ArrowRightIcon data-icon="inline-end" />
-          </div>
+          <Button asChild size="sm" className="w-fit">
+            <Link href={`/recaps/${recap.month}`}>
+              View recap
+              <ArrowRightIcon data-icon="inline-end" />
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     );
@@ -48,15 +67,47 @@ export function MonthlyRecapCard({ recap }: { recap: MonthlyRecapCardType }) {
           <Badge variant="secondary">Monthly recap</Badge>
           <CardTitle>Your month has enough material to summarize.</CardTitle>
           <CardDescription>
-            {recap.journalCount} reflections are ready. Recap generation is
-            planned next, but the card state is already wired to the same
-            contract.
+            {recap.journalCount} reflections are ready. Generate a gentle
+            monthly reflection from your journals.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-xl border border-border/80 bg-background/75 px-3 py-2 text-sm text-muted-foreground">
-            Recap generation trigger will be available in the next build.
-          </div>
+        <CardContent className="flex flex-col gap-3">
+          <Button
+            size="sm"
+            className="w-fit"
+            onClick={onGenerate}
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                Generating
+              </>
+            ) : (
+              <>
+                Generate monthly recap
+                <ArrowRightIcon data-icon="inline-end" />
+              </>
+            )}
+          </Button>
+          {hasError ? (
+            <Alert variant="destructive">
+              <AlertTitle>Couldn’t generate the recap.</AlertTitle>
+              <AlertDescription>
+                Your journals are safe. Try again when you’re ready.
+              </AlertDescription>
+              <div className="mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onRetry}
+                  disabled={isGenerating}
+                >
+                  Retry
+                </Button>
+              </div>
+            </Alert>
+          ) : null}
         </CardContent>
       </Card>
     );

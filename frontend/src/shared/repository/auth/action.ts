@@ -20,3 +20,11 @@ export async function googleOAuthCallback(
   );
   return response.data;
 }
+
+// Demo-only auxiliary call. NOT part of the OpenAPI contract.
+// Pairs with /api/logout to clear the demo session cookie. Replace with a
+// pure client-side token-discard once a real bearer auth backend is in place.
+export async function logout() {
+  const response = await apiClient.post<{ success: true }>("/logout");
+  return response.data;
+}

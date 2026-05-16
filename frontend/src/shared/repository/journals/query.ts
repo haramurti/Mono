@@ -6,7 +6,9 @@ import {
   getCalendar,
   getJournalByDate,
   summarizeTodayJournal,
+  updateJournalByDate,
 } from "@/shared/repository/journals/action";
+import type { UpdateJournalByDateRequestDto } from "@/shared/repository/journals/dto";
 
 export const journalQueryKeys = {
   all: ["journals"] as const,
@@ -37,6 +39,27 @@ export function useSummarizeTodayJournalMutation() {
 
   return useMutation({
     mutationFn: summarizeTodayJournal,
+    onSuccess: (journal) => {
+      queryClient.invalidateQueries({
+        queryKey: journalQueryKeys.calendarRoot,
+      });
+      queryClient.invalidateQueries({ queryKey: ["chat", "today"] });
+      queryClient.setQueryData(journalQueryKeys.detail(journal.date), journal);
+    },
+  });
+}
+
+export function useUpdateJournalByDateMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      date,
+      payload,
+    }: {
+      date: string;
+      payload: UpdateJournalByDateRequestDto;
+    }) => updateJournalByDate(date, payload),
     onSuccess: (journal) => {
       queryClient.invalidateQueries({
         queryKey: journalQueryKeys.calendarRoot,

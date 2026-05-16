@@ -1,1 +1,6 @@
-export type AppSection = "capture" | "history" | "journal";
+export type AppSection =
+  | "capture"
+  | "history"
+  | "journal"
+  | "recap"
+  | "profile";
