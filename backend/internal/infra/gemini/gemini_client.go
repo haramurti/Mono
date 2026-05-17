@@ -9,7 +9,6 @@ import (
 
 	"google.golang.org/genai"
 
-	"github.com/haramurti/Mono/internal/app/chat/contract"
 	"github.com/haramurti/Mono/internal/app/chat/dto"
 )
 
@@ -33,7 +32,7 @@ type geminiClient struct {
 	client *genai.Client
 }
 
-func NewGeminiClient() (contract.GeminiClient, error) {
+func NewGeminiClient() (*geminiClient, error) {
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("GEMINI_API_KEY is not set")
@@ -218,4 +217,9 @@ func TodayDate() time.Time {
 	loc, _ := time.LoadLocation("Asia/Jakarta")
 	now := time.Now().In(loc)
 	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+}
+
+// tambah method ini ke geminiClient struct
+func (g *geminiClient) RawClient() *genai.Client {
+	return g.client
 }

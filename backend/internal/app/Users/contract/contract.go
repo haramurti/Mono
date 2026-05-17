@@ -30,3 +30,9 @@ type AuthService interface {
 	RefreshToken(ctx context.Context, req *dto.RefreshTokenRequest) (*dto.RefreshTokenResponse, error)
 	GetCurrentUser(ctx context.Context, userID string) (*dto.UserResponse, error)
 }
+
+// UserMemoryRepository — interface untuk manage rolling memory summary
+type UserMemoryRepository interface {
+	FindByUserID(ctx context.Context, userID string) (*entity.UserMemory, error)
+	Upsert(ctx context.Context, userID string, summary string) error
+}
