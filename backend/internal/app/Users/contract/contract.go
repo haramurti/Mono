@@ -3,8 +3,8 @@ package contract
 import (
 	"context"
 
-	"github.com/haramurti/Mono/internal/app/Users/dto"
-	"github.com/haramurti/Mono/internal/app/Users/entity"
+	"github.com/haramurti/Mono/internal/app/users/dto"
+	"github.com/haramurti/Mono/internal/app/users/entity"
 )
 
 // UserRepository — interface untuk semua DB operation User

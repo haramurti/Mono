@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	userEntity "github.com/haramurti/Mono/internal/app/Users/entity"
+	userEntity "github.com/haramurti/Mono/internal/app/users/entity"
 	"gorm.io/gorm"
 )
 

@@ -7,10 +7,10 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/google/uuid"
-	userEntity "github.com/haramurti/Mono/internal/app/Users/entity"
 	"github.com/haramurti/Mono/internal/app/chat/contract"
 	"github.com/haramurti/Mono/internal/app/chat/entity"
 	chatEntity "github.com/haramurti/Mono/internal/app/chat/entity"
+	userEntity "github.com/haramurti/Mono/internal/app/users/entity"
 )
 
 // ─────────────────────────────────────────────

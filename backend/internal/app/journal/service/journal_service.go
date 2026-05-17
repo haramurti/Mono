@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 
-	userContract "github.com/haramurti/Mono/internal/app/Users/contract"
 	chatContract "github.com/haramurti/Mono/internal/app/chat/contract"
 	chatDto "github.com/haramurti/Mono/internal/app/chat/dto"
 	chatEntity "github.com/haramurti/Mono/internal/app/chat/entity"
+	userContract "github.com/haramurti/Mono/internal/app/users/contract"
 
 	"github.com/haramurti/Mono/internal/app/journal/contract"
 	"github.com/haramurti/Mono/internal/app/journal/dto"
@@ -81,6 +82,7 @@ func (s *journalService) SummarizeToday(ctx context.Context, userID string) (*dt
 	// 4. call Gemini summarizer
 	result, err := s.summarizer.Summarize(ctx, chatHistory)
 	if err != nil {
+		log.Printf("❌ Summarize error: %v", err) // tambah ini
 		return nil, fmt.Errorf("SUMMARY_GENERATION_FAILED: %w", err)
 	}
 
@@ -152,6 +154,7 @@ func (s *journalService) SummarizeToday(ctx context.Context, userID string) (*dt
 	go s.updateUserMemory(context.Background(), userID, result.Summary)
 
 	return toJournalResponse(journal), nil
+
 }
 
 // ─────────────────────────────────────────────

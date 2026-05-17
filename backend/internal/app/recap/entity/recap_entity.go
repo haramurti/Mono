@@ -3,7 +3,7 @@ package entity
 import (
 	"time"
 
-	"github.com/haramurti/Mono/internal/app/Users/entity"
+	"github.com/haramurti/Mono/internal/app/users/entity"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

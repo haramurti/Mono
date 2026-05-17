@@ -7,8 +7,8 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/google/uuid"
-	"github.com/haramurti/Mono/internal/app/Users/contract"
-	"github.com/haramurti/Mono/internal/app/Users/entity"
+	"github.com/haramurti/Mono/internal/app/users/contract"
+	"github.com/haramurti/Mono/internal/app/users/entity"
 )
 
 // ─────────────────────────────────────────────

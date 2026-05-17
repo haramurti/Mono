@@ -3,10 +3,10 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 
-	authHandler "github.com/haramurti/Mono/internal/app/Users/handler"
 	chatHandler "github.com/haramurti/Mono/internal/app/chat/handler"
 	journalHandler "github.com/haramurti/Mono/internal/app/journal/handler"
 	recapHandler "github.com/haramurti/Mono/internal/app/recap/handler"
+	authHandler "github.com/haramurti/Mono/internal/app/users/handler"
 )
 
 func SetupRoutes(

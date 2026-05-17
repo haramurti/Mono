@@ -4,8 +4,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/haramurti/Mono/internal/app/Users/contract"
-	"github.com/haramurti/Mono/internal/app/Users/dto"
+	"github.com/haramurti/Mono/internal/app/users/contract"
+	"github.com/haramurti/Mono/internal/app/users/dto"
 )
 
 type AuthHandler struct {

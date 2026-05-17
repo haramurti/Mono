@@ -3,9 +3,9 @@ package contract
 import (
 	"context"
 
-	userEntity "github.com/haramurti/Mono/internal/app/Users/entity"
 	"github.com/haramurti/Mono/internal/app/chat/dto"
 	chatEntity "github.com/haramurti/Mono/internal/app/chat/entity"
+	userEntity "github.com/haramurti/Mono/internal/app/users/entity"
 )
 
 // ─────────────────────────────────────────────
