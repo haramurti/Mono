@@ -1,69 +1,70 @@
 "use client";
 
 import {
-   BookMarkedIcon,
-   CalendarDaysIcon,
-   SparklesIcon,
-   UserIcon,
-} from 'lucide-react';
-import Link, { type LinkProps } from 'next/link';
+  BookMarkedIcon,
+  CalendarDaysIcon,
+  SparklesIcon,
+  UserIcon,
+} from "lucide-react";
+import Link, { type LinkProps } from "next/link";
 import type { ReactNode } from "react";
 
 import {
-   Tooltip,
-   TooltipContent,
-   TooltipProvider,
-   TooltipTrigger,
-} from '@/shared/components/ui/tooltip';
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
+import { getTodayDateKey } from "@/shared/lib/date";
 import { cn } from "@/shared/lib/utils";
 import type { AppSection } from "@/shared/types/app";
 
 type NavItem = {
-   key: AppSection;
-   label: string;
-   icon: ReactNode;
-   href?: string;
-   config: Omit<LinkProps, 'href'>;
+  key: AppSection;
+  label: string;
+  icon: ReactNode;
+  href?: string;
+  config: Omit<LinkProps, "href">;
 };
 
-function getNavItems(journalHref?: string): NavItem[] {
+function getNavItems(): NavItem[] {
   return [
-     {
-        key: 'capture',
-        label: 'Capture',
-        href: '/capture',
-        icon: <SparklesIcon className="size-4" aria-hidden="true" />,
-        config: {
-           prefetch: true,
-        },
-     },
-     {
-        key: 'history',
-        label: 'History',
-        href: '/history',
-        icon: <CalendarDaysIcon className="size-4" aria-hidden="true" />,
-        config: {
-           prefetch: true,
-        },
-     },
-     {
-        key: 'journal',
-        label: 'Journal',
-        href: journalHref,
-        icon: <BookMarkedIcon className="size-4" aria-hidden="true" />,
-        config: {
-           prefetch: true,
-        },
-     },
-     {
-        key: 'profile',
-        label: 'Profile',
-        href: '/profile',
-        icon: <UserIcon className="size-4" aria-hidden="true" />,
-        config: {
-           prefetch: true,
-        },
-     },
+    {
+      key: "capture",
+      label: "Capture",
+      href: "/capture",
+      icon: <SparklesIcon className="size-4" aria-hidden="true" />,
+      config: {
+        prefetch: true,
+      },
+    },
+    {
+      key: "history",
+      label: "History",
+      href: "/history",
+      icon: <CalendarDaysIcon className="size-4" aria-hidden="true" />,
+      config: {
+        prefetch: true,
+      },
+    },
+    {
+      key: "journal",
+      label: "Journal",
+      href: `/journal/${getTodayDateKey()}`,
+      icon: <BookMarkedIcon className="size-4" aria-hidden="true" />,
+      config: {
+        prefetch: true,
+      },
+    },
+    {
+      key: "profile",
+      label: "Profile",
+      href: "/profile",
+      icon: <UserIcon className="size-4" aria-hidden="true" />,
+      config: {
+        prefetch: true,
+      },
+    },
   ];
 }
 
@@ -76,119 +77,110 @@ function AppNav({
   activeSection: AppSection;
   direction: "row" | "column";
 }) {
-  const isDesktopNav = direction === 'column';
+  const isDesktopNav = direction === "column";
 
   return (
-     <TooltipProvider delayDuration={120}>
-        <nav
-           aria-label="Primary"
-           className={cn(
-              'flex gap-2',
-              direction === 'column' ? 'flex-col' : 'flex-row items-center',
-           )}
-        >
-           {items.map((item) => {
-              const isActive = item.key === activeSection;
+    <TooltipProvider delayDuration={120}>
+      <nav
+        aria-label="Primary"
+        className={cn(
+          "flex gap-2",
+          direction === "column" ? "flex-col" : "flex-row items-center",
+        )}
+      >
+        {items.map((item) => {
+          const isActive = item.key === activeSection;
 
-              const baseClass = cn(
-                 'min-h-11 rounded-xl border px-3 py-2 text-xs font-medium transition-colors',
-                 direction === 'column'
-                    ? 'size-11 items-center justify-center'
-                    : 'flex-1 flex-row items-center justify-center gap-2',
-                 isActive
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border bg-[var(--surface-strong)] text-card-foreground',
-              );
+          const baseClass = cn(
+            "min-h-11 rounded-xl border px-3 py-2 text-xs font-medium transition-colors",
+            direction === "column"
+              ? "size-11 items-center justify-center"
+              : "flex-1 flex-row items-center justify-center gap-2",
+            isActive
+              ? "border-primary bg-primary text-primary-foreground"
+              : "border-border bg-[var(--surface-strong)] text-card-foreground",
+          );
 
-              const label = (
-                 <span
-                    className={cn(
-                       direction === 'column' ? 'sr-only' : 'text-xs',
-                    )}
-                 >
-                    {item.label}
-                 </span>
-              );
+          const label = (
+            <span
+              className={cn(direction === "column" ? "sr-only" : "text-xs")}
+            >
+              {item.label}
+            </span>
+          );
 
-              const navContent = (
-                 <>
-                    {item.icon}
-                    {label}
-                 </>
-              );
+          const navContent = (
+            <>
+              {item.icon}
+              {label}
+            </>
+          );
 
-              if (!item.href) {
-                 const disabledItem = (
-                    <span
-                       key={item.key}
-                       title={isDesktopNav ? undefined : item.label}
-                       className={cn(
-                          baseClass,
-                          'flex cursor-not-allowed opacity-45',
-                       )}
-                       aria-disabled="true"
-                    >
-                       {navContent}
-                    </span>
-                 );
+          if (!item.href) {
+            const disabledItem = (
+              <span
+                key={item.key}
+                title={isDesktopNav ? undefined : item.label}
+                className={cn(baseClass, "flex cursor-not-allowed opacity-45")}
+                aria-disabled="true"
+              >
+                {navContent}
+              </span>
+            );
 
-                 if (!isDesktopNav) {
-                    return disabledItem;
-                 }
+            if (!isDesktopNav) {
+              return disabledItem;
+            }
 
-                 return (
-                    <Tooltip key={item.key}>
-                       <TooltipTrigger asChild>{disabledItem}</TooltipTrigger>
-                       <TooltipContent side="right">
-                          {item.label}
-                       </TooltipContent>
-                    </Tooltip>
-                 );
-              }
+            return (
+              <Tooltip key={item.key}>
+                <TooltipTrigger asChild>{disabledItem}</TooltipTrigger>
+                <TooltipContent side="right">{item.label}</TooltipContent>
+              </Tooltip>
+            );
+          }
 
-              const linkedItem = (
-                 <Link
-                    key={item.key}
-                    href={item.href}
-                    aria-label={item.label}
-                    title={isDesktopNav ? undefined : item.label}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={cn(
-                       baseClass,
-                       'flex',
-                       !isActive && 'hover:bg-secondary',
-                    )}
-                 >
-                    {navContent}
-                 </Link>
-              );
+          const linkedItem = (
+            <Link
+              key={item.key}
+              href={item.href}
+              aria-label={item.label}
+              title={isDesktopNav ? undefined : item.label}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                baseClass,
+                "flex",
+                !isActive && "hover:bg-secondary",
+              )}
+            >
+              {navContent}
+            </Link>
+          );
 
-              if (!isDesktopNav) {
-                 return linkedItem;
-              }
+          if (!isDesktopNav) {
+            return linkedItem;
+          }
 
-              return (
-                 <Tooltip key={item.key}>
-                    <TooltipTrigger asChild>{linkedItem}</TooltipTrigger>
-                    <TooltipContent side="right">{item.label}</TooltipContent>
-                 </Tooltip>
-              );
-           })}
-        </nav>
-     </TooltipProvider>
+          return (
+            <Tooltip key={item.key}>
+              <TooltipTrigger asChild>{linkedItem}</TooltipTrigger>
+              <TooltipContent side="right">{item.label}</TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </nav>
+    </TooltipProvider>
   );
 }
 
 export function AppShellLayout({
   activeSection,
-  journalHref,
   children,
 }: {
   activeSection: AppSection;
-  journalHref?: string;
   children: ReactNode;
 }) {
-  const navItems = getNavItems(journalHref);
+  const navItems = getNavItems();
 
   return (
     <div className="min-h-screen bg-background pb-28 md:pb-0">
@@ -234,31 +226,31 @@ export function AppShellCard({
   children: ReactNode;
   className?: string;
 }) {
-  const upperPadding = 'pt-5 md:pl-7 md:pr-7 md:pt-7';
-  const lowerPadding = 'pb-5 md:pl-7 md:pr-7 md:pb-7';
+  const upperPadding = "pt-5 md:pl-7 md:pr-7 md:pt-7";
+  const lowerPadding = "pb-5 md:pl-7 md:pr-7 md:pb-7";
 
   return (
-     <section
-        className={cn(
-           `min-h-[94dvh] rounded-2xl  border border-border/79 bg-[var(--surface-glass)]`,
-           className,
-        )}
-     >
-        <header
-           className={`rounded-tl-2xl rounded-tr-2xl mb-6 border-border/80 pb-4 sticky top-0 z-10 bg-[var(--surface-glass)] backdrop-blur-xl pt-5 shadow-xl shadow-card ${upperPadding}`}
-        >
-           <div className="flex items-start justify-between gap-4">
-              <div>
-                 <h1 className="display-lg">{title}</h1>
-                 <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                    {description}
-                 </p>
-              </div>
+    <section
+      className={cn(
+        `min-h-[94dvh] rounded-2xl  border border-border/79 bg-[var(--surface-glass)]`,
+        className,
+      )}
+    >
+      <header
+        className={`rounded-tl-2xl rounded-tr-2xl mb-6 border-border/80 pb-4 sticky top-0 z-10 bg-[var(--surface-glass)] backdrop-blur-xl pt-5 shadow-xl shadow-card ${upperPadding}`}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="display-lg">{title}</h1>
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+              {description}
+            </p>
+          </div>
 
-              {action}
-           </div>
-        </header>
-        <div className={lowerPadding}>{children}</div>
-     </section>
+          {action}
+        </div>
+      </header>
+      <div className={lowerPadding}>{children}</div>
+    </section>
   );
 }

@@ -53,8 +53,6 @@ export function JournalDetailContainer() {
   const canContinueJournaling =
     journalIsEditable && journal?.date === getTodayDateKey();
 
-  const journalHref = `/journal/${date}`;
-
   function renderHeaderAction() {
     if (isEditing) {
       return (
@@ -103,16 +101,26 @@ export function JournalDetailContainer() {
   }
 
   function renderEmptyState() {
+    const isToday = date === getTodayDateKey();
+
     return (
       <Empty>
         <EmptyHeader>
-          <EmptyTitle>No journal found for this date.</EmptyTitle>
+          <EmptyTitle>
+            {isToday
+              ? "You haven't journaled today yet."
+              : "No journal found for this date."}
+          </EmptyTitle>
           <EmptyDescription>
-            This date does not have a saved reflection yet.
+            {isToday
+              ? "Start a guided conversation to capture how you're feeling."
+              : "This date does not have a saved reflection yet."}
           </EmptyDescription>
         </EmptyHeader>
         <Button asChild>
-          <Link href="/history">Return to history</Link>
+          <Link href={isToday ? "/capture" : "/history"}>
+            {isToday ? "Start journaling" : "Return to history"}
+          </Link>
         </Button>
       </Empty>
     );
@@ -180,7 +188,7 @@ export function JournalDetailContainer() {
 
   if (journalQuery.isLoading) {
     return (
-      <AppShellLayout activeSection="journal" journalHref={journalHref}>
+      <AppShellLayout activeSection="journal">
         <AppShellCard
           title="Today’s journal"
           description="Structured reflection from your guided conversation."
@@ -193,7 +201,7 @@ export function JournalDetailContainer() {
   }
 
   return (
-    <AppShellLayout activeSection="journal" journalHref={journalHref}>
+    <AppShellLayout activeSection="journal">
       <AppShellCard
         title={isEditing ? "Edit reflection" : "Today’s journal"}
         description={

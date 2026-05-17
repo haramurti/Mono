@@ -8,7 +8,6 @@ import { DashboardStreakCard } from "@/features/dashboard/components/dashboard-s
 import { MonthlyRecapCard } from "@/features/dashboard/components/monthly-recap-card";
 import { useDashboardController } from "@/features/dashboard/hooks/use-dashboard-controller";
 import {
-  getDashboardJournalHref,
   getDashboardTitle,
   getStreakLabel,
   getTodayCta,
@@ -41,7 +40,6 @@ export function DashboardContainer() {
   } = useDashboardController();
 
   const todayCta = getTodayCta(todayChatQuery.data?.journalState.status);
-  const journalHref = getDashboardJournalHref(todayChatQuery.data);
   const isCalendarLoading = calendarQuery.isLoading || todayChatQuery.isLoading;
 
   function renderCalendarContent() {
@@ -82,7 +80,7 @@ export function DashboardContainer() {
   }
 
   return (
-    <AppShellLayout activeSection="history" journalHref={journalHref}>
+    <AppShellLayout activeSection="history">
       <AppShellCard
         title={getDashboardTitle(user?.name)}
         description="Review your month, spot emotional patterns, then return to capture for today."

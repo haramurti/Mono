@@ -12,7 +12,6 @@ import { useJournalChatController } from "@/features/journal-chat/hooks/use-jour
 import {
   getChatDateLabel,
   getHelperText,
-  getJournalHref,
   getMoodBadgeProps,
   getSummaryStateLabel,
   mapChatMessagesForDisplay,
@@ -42,7 +41,6 @@ export function JournalChatContainer() {
     user,
   } = useJournalChatController();
 
-  const journalHref = getJournalHref(chat);
   const moodBadge = getMoodBadgeProps(chat?.initialMood);
   const messageItems = mapChatMessagesForDisplay(chat?.messages, user?.name);
   const userMessageCount = chat?.journalState.userMessageCount ?? 0;
@@ -152,7 +150,7 @@ export function JournalChatContainer() {
   }
 
   return (
-    <AppShellLayout activeSection="capture" journalHref={journalHref}>
+    <AppShellLayout activeSection="capture">
       <JournalChatSurface>
         <JournalChatHeader
           dateLabel={getChatDateLabel()}
