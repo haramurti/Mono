@@ -15,7 +15,7 @@ servers:
 
 tags:
   - name: Auth
-    description: Authentication and current user
+    description: Authentication — manual (email/password) and Google OAuth
   - name: Chat
     description: AI-guided daily journaling chat
   - name: Journals
@@ -27,54 +27,30 @@ security:
   - bearerAuth: []
 
 paths:
-  /me:
-    get:
-      tags:
-        - Auth
-      summary: Get current user
-      operationId: getCurrentUser
-      responses:
-        "200":
-          description: Current authenticated user
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/User"
-              examples:
-                success:
-                  value:
-                    id: user_123
-                    email: alex@example.com
-                    name: Alex
-                    avatarUrl: https://example.com/avatar.png
-                    createdAt: "2026-05-01T10:00:00Z"
-                    lastLoginAt: "2026-05-10T10:00:00Z"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-
-  /auth/google/callback:
+  # ─────────────────────────────────────────────
+  # AUTH
+  # ─────────────────────────────────────────────
+  /auth/register:
     post:
-      tags:
-        - Auth
-      summary: Complete Google OAuth login
-      description: |
-        Exchanges or verifies a Google OAuth credential and creates or updates
-        the Mono user session. Exact implementation may be deferred.
-      operationId: googleOAuthCallback
+      tags: [Auth]
+      summary: Register with email and password
+      operationId: register
       security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GoogleOAuthCallbackRequest"
+              $ref: "#/components/schemas/RegisterRequest"
             examples:
-              token:
+              register:
                 value:
-                  idToken: google_id_token_here
+                  name: Alex
+                  email: alex@example.com
+                  password: secretpassword123
       responses:
-        "200":
-          description: Login successful
+        "201":
+          description: Registration successful
           content:
             application/json:
               schema:
@@ -86,26 +62,186 @@ paths:
                       id: user_123
                       email: alex@example.com
                       name: Alex
-                      avatarUrl: https://example.com/avatar.png
-                      createdAt: "2026-05-01T10:00:00Z"
+                      avatarUrl: null
+                      createdAt: "2026-05-10T10:00:00Z"
                       lastLoginAt: "2026-05-10T10:00:00Z"
-                    accessToken: jwt_or_session_token_optional
+                    accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    refreshToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                conflict:
+                  value:
+                    code: EMAIL_ALREADY_EXISTS
+                    message: This email is already registered.
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email and password
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            examples:
+              login:
+                value:
+                  email: alex@example.com
+                  password: secretpassword123
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid:
+                  value:
+                    code: INVALID_CREDENTIALS
+                    message: Email or password is incorrect.
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshTokenResponse"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid:
+                  value:
+                    code: INVALID_REFRESH_TOKEN
+                    message: Refresh token is invalid or has expired.
+
+  /auth/google/callback:
+    post:
+      tags: [Auth]
+      summary: Complete Google OAuth login
+      operationId: googleOAuthCallback
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleOAuthCallbackRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
 
+  /me:
+    get:
+      tags: [Auth]
+      summary: Get current user
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: Current authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ─────────────────────────────────────────────
+  # CHAT
+  # ─────────────────────────────────────────────
   /chat/messages:
+    get:
+      tags: [Chat]
+      summary: Get today's chat messages
+      operationId: getTodayMessages
+      description: |
+        Returns all messages from today's active chat session.
+        If no session exists today, returns an empty messages array
+        and journalState with status empty.
+      responses:
+        "200":
+          description: Today's chat history and journal state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetChatMessagesResponse"
+              examples:
+                withMessages:
+                  value:
+                    messages:
+                      - id: msg_001
+                        journalId: session_123
+                        role: assistant
+                        content: "Hi! How are you feeling today?"
+                        createdAt: "2026-05-10T09:00:00Z"
+                      - id: msg_002
+                        journalId: session_123
+                        role: user
+                        content: "I feel a bit tired actually."
+                        createdAt: "2026-05-10T09:01:00Z"
+                    journalState:
+                      date: "2026-05-10"
+                      status: in_progress
+                      userMessageCount: 1
+                noSession:
+                  value:
+                    messages: []
+                    journalState:
+                      date: "2026-05-10"
+                      status: empty
+                      userMessageCount: 0
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
     post:
-      tags:
-        - Chat
+      tags: [Chat]
       summary: Send a user journal message and receive Mono's reply
       operationId: sendChatMessage
       description: |
         Sends a message to today's daily journal thread. If initialMood is
-        provided, it is stored as structured journal data rather than as a
-        normal chat message.
-
-        Mono should respond with empathetic validation and one reflective
-        follow-up question.
+        provided, it is stored as structured journal data.
+        Mono responds with empathetic validation and one reflective follow-up question.
       requestBody:
         required: true
         content:
@@ -133,6 +269,7 @@ paths:
                   value:
                     message:
                       id: msg_456
+                      journalId: session_123
                       role: assistant
                       content: That sounds really tiring. What part of today felt the heaviest?
                       createdAt: "2026-05-10T12:00:00Z"
@@ -149,18 +286,17 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  # ─────────────────────────────────────────────
+  # JOURNALS
+  # ─────────────────────────────────────────────
   /journals/today/summarize:
     post:
-      tags:
-        - Journals
+      tags: [Journals]
       summary: Summarize today's journal
       operationId: summarizeTodayJournal
       description: |
         Generates a first-person daily journal summary for today's chat thread.
-
-        Explicit user-triggered summarization should only be allowed when there
-        are at least 3 user messages. Backend internal end-of-day jobs may
-        summarize with fewer messages for consistency.
+        Requires at least 3 user messages.
       responses:
         "200":
           description: Generated daily journal summary
@@ -168,33 +304,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Journal"
-              examples:
-                success:
-                  value:
-                    id: journal_123
-                    userId: user_123
-                    date: "2026-05-10"
-                    status: summarized
-                    title: A Heavy Day, But I Kept Going
-                    summary: Today I felt mentally tired because there were many things on my mind. I realized that I may have been putting too much pressure on myself.
-                    primaryMood: tired
-                    moodIntensity: 4
-                    emotionTags:
-                      - overwhelmed
-                      - uncertain
-                    topicTags:
-                      - work
-                      - self_esteem
-                    keyInsight: I realized that I have been too hard on myself.
-                    suggestedNextAction: Tomorrow, I want to start with one small task and give myself permission to rest.
-                    language: en
-                    isEdited: false
-                    safetyFlag: none
-                    createdAt: "2026-05-10T12:00:00Z"
-                    updatedAt: "2026-05-10T12:10:00Z"
-                    summarizedAt: "2026-05-10T12:10:00Z"
         "400":
-          description: Not enough user messages or invalid request
+          description: Not enough user messages
           content:
             application/json:
               schema:
@@ -220,8 +331,7 @@ paths:
 
   /journals/calendar:
     get:
-      tags:
-        - Journals
+      tags: [Journals]
       summary: Get calendar journal data for a month
       operationId: getJournalCalendar
       parameters:
@@ -240,32 +350,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CalendarResponse"
-              examples:
-                success:
-                  value:
-                    month: "2026-05"
-                    streak: 4
-                    days:
-                      - date: "2026-05-07"
-                        status: summarized
-                        primaryMood: calm
-                        moodEmoji: 😌
-                        title: A Quiet Day to Reset
-                        isEdited: false
-                      - date: "2026-05-08"
-                        status: edited
-                        primaryMood: anxious
-                        moodEmoji: 😟
-                        title: Trying to Understand My Worries
-                        isEdited: true
-                    monthlyRecap:
-                      status: generated
-                      month: "2026-05"
-                      title: A Month of Slowing Down
-                      summaryPreview: This month, you often moved between feeling tired and hopeful.
-                      mostFrequentMood: tired
-                      moodEmoji: 😴
-                      journalCount: 17
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
@@ -273,8 +357,7 @@ paths:
 
   /journals/{date}:
     get:
-      tags:
-        - Journals
+      tags: [Journals]
       summary: Get journal by date
       operationId: getJournalByDate
       parameters:
@@ -286,35 +369,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Journal"
-              examples:
-                success:
-                  value:
-                    id: journal_123
-                    userId: user_123
-                    date: "2026-05-10"
-                    status: summarized
-                    title: A Heavy Day, But I Kept Going
-                    summary: Today I felt mentally tired...
-                    primaryMood: tired
-                    moodIntensity: 4
-                    emotionTags:
-                      - overwhelmed
-                      - uncertain
-                    topicTags:
-                      - work
-                      - self_esteem
-                    keyInsight: I realized that I have been too hard on myself.
-                    suggestedNextAction: Tomorrow, I want to start with one small task.
-                    language: en
-                    isEdited: false
-                    safetyFlag: none
-                    createdAt: "2026-05-10T12:00:00Z"
-                    updatedAt: "2026-05-10T12:10:00Z"
-                    summarizedAt: "2026-05-10T12:10:00Z"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
-          description: Journal does not exist for this date
+          description: Journal not found
           content:
             application/json:
               schema:
@@ -326,14 +384,12 @@ paths:
                     message: No journal found for this date.
 
     patch:
-      tags:
-        - Journals
+      tags: [Journals]
       summary: Update journal by date
       operationId: updateJournalByDate
       description: |
-        Updates user-editable journal fields. Updating any field sets
-        status to edited and isEdited to true. This endpoint does not trigger
-        automatic summary regeneration.
+        Updates user-editable fields. Sets status to edited and isEdited to true.
+        Does not trigger automatic summary regeneration.
       parameters:
         - $ref: "#/components/parameters/DatePath"
       requestBody:
@@ -342,17 +398,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/UpdateJournalRequest"
-            examples:
-              edit:
-                value:
-                  title: A Different Title
-                  summary: Today I realized something important...
-                  primaryMood: calm
-                  emotionTags:
-                    - relieved
-                    - hopeful
-                  topicTags:
-                    - personal_growth
       responses:
         "200":
           description: Updated journal
@@ -365,18 +410,25 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "404":
-          description: Journal does not exist for this date
+          description: Journal not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  # ─────────────────────────────────────────────
+  # RECAPS
+  # ─────────────────────────────────────────────
   /recaps/monthly:
     get:
-      tags:
-        - Recaps
+      tags: [Recaps]
       summary: Get monthly recap state or generated recap
       operationId: getMonthlyRecap
+      description: |
+        Returns one of three possible states:
+        - generated: recap exists and is ready to view
+        - ready_to_generate: enough journals (>=3) but recap not yet generated
+        - not_enough_data: fewer than 3 journals this month
       parameters:
         - name: month
           in: query
@@ -404,23 +456,17 @@ paths:
                     month: "2026-05"
                     status: generated
                     title: A Month of Slowing Down
-                    summary: This month, you often moved between feeling tired and hopeful. Many of your reflections were about work, self-expectation, and learning to rest without guilt.
+                    summary: This month, you often moved between feeling tired and hopeful.
                     mostFrequentMood: tired
                     moodDistribution:
                       tired: 8
                       anxious: 5
                       calm: 4
                       happy: 3
-                    topEmotionTags:
-                      - overwhelmed
-                      - uncertain
-                      - relieved
-                    topTopicTags:
-                      - work
-                      - self_esteem
-                      - personal_growth
+                    topEmotionTags: [overwhelmed, uncertain, relieved]
+                    topTopicTags: [work, self_esteem, personal_growth]
                     recurringPattern: You often felt overwhelmed when you expected yourself to handle everything at once.
-                    monthlyInsight: You seem to be learning that rest is not a failure, but part of staying steady.
+                    monthlyInsight: You seem to be learning that rest is not a failure.
                     suggestedFocusNextMonth: Try noticing one small moment each day where you allow yourself to slow down.
                     journalCount: 17
                     generatedAt: "2026-05-31T23:00:00Z"
@@ -445,16 +491,13 @@ paths:
 
   /recaps/monthly/generate:
     post:
-      tags:
-        - Recaps
+      tags: [Recaps]
       summary: Generate monthly recap
       operationId: generateMonthlyRecap
       description: |
         Generates a monthly recap from journals in the selected month.
-
         Only journals with status summarized or edited are included.
-        Minimum required journals: 3.
-        Raw chat messages are not required for monthly recap generation.
+        Minimum required: 3 journals.
       requestBody:
         required: true
         content:
@@ -473,7 +516,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/MonthlyRecap"
         "400":
-          description: Not enough journals or invalid request
+          description: Not enough journals
           content:
             application/json:
               schema:
@@ -486,7 +529,7 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "500":
-          description: Monthly recap generation failed
+          description: Generation failed
           content:
             application/json:
               schema:
@@ -540,30 +583,24 @@ components:
                 message: Authentication is required.
 
   schemas:
+    # ─────────────────────────────────────────────
+    # AUTH
+    # ─────────────────────────────────────────────
     User:
       type: object
-      required:
-        - id
-        - email
-        - name
-        - avatarUrl
-        - createdAt
-        - lastLoginAt
+      required: [id, email, name, createdAt, lastLoginAt]
       properties:
         id:
           type: string
-          example: user_123
         email:
           type: string
           format: email
-          example: alex@example.com
         name:
           type: string
-          example: Alex
         avatarUrl:
           type: string
           format: uri
-          example: https://example.com/avatar.png
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -571,181 +608,194 @@ components:
           type: string
           format: date-time
 
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
     GoogleOAuthCallbackRequest:
       type: object
-      required:
-        - idToken
+      required: [idToken]
       properties:
         idToken:
           type: string
-          description: Google OAuth ID token or credential.
 
     AuthResponse:
       type: object
-      required:
-        - user
+      required: [user, accessToken, refreshToken]
       properties:
         user:
           $ref: "#/components/schemas/User"
         accessToken:
           type: string
-          nullable: true
-          description: Optional token if bearer auth is used by the implementation.
+        refreshToken:
+          type: string
 
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    RefreshTokenResponse:
+      type: object
+      required: [accessToken, refreshToken]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+          description: Rotated — replace the old one.
+
+    # ─────────────────────────────────────────────
+    # ENUMS
+    # ─────────────────────────────────────────────
     PrimaryMood:
       type: string
-      enum:
-        - happy
-        - calm
-        - sad
-        - angry
-        - anxious
-        - tired
-        - confused
-        - unknown
+      enum: [happy, calm, sad, angry, anxious, tired, confused, unknown]
 
     EmotionTag:
       type: string
       enum:
-        - overwhelmed
-        - grateful
-        - lonely
-        - hopeful
-        - frustrated
-        - proud
-        - uncertain
-        - relieved
-        - stressed
-        - motivated
+        [
+          overwhelmed,
+          grateful,
+          lonely,
+          hopeful,
+          frustrated,
+          proud,
+          uncertain,
+          relieved,
+          stressed,
+          motivated,
+        ]
 
     TopicTag:
       type: string
       enum:
-        - work
-        - school
-        - family
-        - relationship
-        - health
-        - self_esteem
-        - future
-        - finance
-        - friendship
-        - personal_growth
+        [
+          work,
+          school,
+          family,
+          relationship,
+          health,
+          self_esteem,
+          future,
+          finance,
+          friendship,
+          personal_growth,
+        ]
 
     JournalStatus:
       type: string
-      enum:
-        - empty
-        - in_progress
-        - summarized
-        - edited
+      enum: [empty, in_progress, summarized, edited]
 
     SafetyFlag:
       type: string
-      enum:
-        - none
-        - crisis
+      enum: [none, crisis]
 
     JournalLanguage:
       type: string
-      enum:
-        - id
-        - en
-        - mixed
-        - other
+      enum: [id, en, mixed, other]
 
     MonthlyRecapStatus:
       type: string
-      enum:
-        - not_enough_data
-        - ready_to_generate
-        - generated
+      enum: [not_enough_data, ready_to_generate, generated]
 
     ChatRole:
       type: string
-      enum:
-        - user
-        - assistant
+      enum: [user, assistant]
 
+    # ─────────────────────────────────────────────
+    # CHAT
+    # ─────────────────────────────────────────────
     ChatMessage:
       type: object
-      required:
-        - id
-        - journalId
-        - role
-        - content
-        - createdAt
+      required: [id, journalId, role, content, createdAt]
       properties:
         id:
           type: string
-          example: msg_456
         journalId:
           type: string
-          example: journal_123
         role:
           $ref: "#/components/schemas/ChatRole"
         content:
           type: string
-          example: That sounds really tiring. What part of today felt the heaviest?
         createdAt:
           type: string
           format: date-time
 
     SendChatMessageRequest:
       type: object
-      required:
-        - content
+      required: [content]
       properties:
         content:
           type: string
           minLength: 1
-          example: I feel tired today.
         initialMood:
           allOf:
             - $ref: "#/components/schemas/PrimaryMood"
           nullable: true
-          description: Optional mood selected at the start of the day.
 
     ChatActions:
       type: object
-      required:
-        - canSummarize
-        - shouldOfferSummary
-        - safetyFlag
+      required: [canSummarize, shouldOfferSummary, safetyFlag]
       properties:
         canSummarize:
           type: boolean
-          description: True when user can manually summarize.
         shouldOfferSummary:
           type: boolean
-          description: True when FE should show the summary offer card.
         safetyFlag:
           $ref: "#/components/schemas/SafetyFlag"
 
     JournalState:
       type: object
-      required:
-        - date
-        - status
-        - userMessageCount
+      required: [date, status, userMessageCount]
       properties:
         date:
           type: string
           format: date
-          example: "2026-05-10"
         status:
           $ref: "#/components/schemas/JournalStatus"
         userMessageCount:
           type: integer
           minimum: 0
-          example: 3
+
+    GetChatMessagesResponse:
+      type: object
+      required: [messages, journalState]
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+        journalState:
+          $ref: "#/components/schemas/JournalState"
 
     SendChatMessageResponse:
       type: object
-      required:
-        - message
-        - actions
-        - journalState
+      required: [message, actions, journalState]
       properties:
         message:
           $ref: "#/components/schemas/ChatMessage"
@@ -754,41 +804,41 @@ components:
         journalState:
           $ref: "#/components/schemas/JournalState"
 
+    # ─────────────────────────────────────────────
+    # JOURNAL
+    # ─────────────────────────────────────────────
     Journal:
       type: object
       required:
-        - id
-        - userId
-        - date
-        - status
-        - emotionTags
-        - topicTags
-        - language
-        - isEdited
-        - safetyFlag
-        - createdAt
-        - updatedAt
+        [
+          id,
+          userId,
+          date,
+          status,
+          emotionTags,
+          topicTags,
+          language,
+          isEdited,
+          safetyFlag,
+          createdAt,
+          updatedAt,
+        ]
       properties:
         id:
           type: string
-          example: journal_123
         userId:
           type: string
-          example: user_123
         date:
           type: string
           format: date
-          example: "2026-05-10"
         status:
           $ref: "#/components/schemas/JournalStatus"
         title:
           type: string
           nullable: true
-          example: A Heavy Day, But I Kept Going
         summary:
           type: string
           nullable: true
-          example: Today I felt mentally tired because there were many things on my mind.
         primaryMood:
           allOf:
             - $ref: "#/components/schemas/PrimaryMood"
@@ -798,7 +848,6 @@ components:
           nullable: true
           minimum: 1
           maximum: 5
-          example: 4
         emotionTags:
           type: array
           items:
@@ -810,11 +859,9 @@ components:
         keyInsight:
           type: string
           nullable: true
-          example: I realized that I have been too hard on myself.
         suggestedNextAction:
           type: string
           nullable: true
-          example: Tomorrow, I want to start with one small task.
         language:
           $ref: "#/components/schemas/JournalLanguage"
         isEdited:
@@ -839,11 +886,9 @@ components:
         title:
           type: string
           minLength: 1
-          example: A Different Title
         summary:
           type: string
           minLength: 1
-          example: Today I realized something important...
         primaryMood:
           $ref: "#/components/schemas/PrimaryMood"
         emotionTags:
@@ -857,52 +902,37 @@ components:
 
     CalendarDay:
       type: object
-      required:
-        - date
-        - status
-        - primaryMood
-        - moodEmoji
-        - title
-        - isEdited
+      required: [date, status, primaryMood, moodEmoji, title, isEdited]
       properties:
         date:
           type: string
           format: date
-          example: "2026-05-07"
         status:
           $ref: "#/components/schemas/JournalStatus"
         primaryMood:
           $ref: "#/components/schemas/PrimaryMood"
         moodEmoji:
           type: string
-          example: 😌
         title:
           type: string
-          example: A Quiet Day to Reset
         isEdited:
           type: boolean
 
     MonthlyRecapCard:
       type: object
-      required:
-        - status
-        - month
-        - journalCount
+      required: [status, month, journalCount]
       properties:
         status:
           $ref: "#/components/schemas/MonthlyRecapStatus"
         month:
           type: string
           pattern: "^\\d{4}-\\d{2}$"
-          example: "2026-05"
         title:
           type: string
           nullable: true
-          example: A Month of Slowing Down
         summaryPreview:
           type: string
           nullable: true
-          example: This month, you often moved between feeling tired and hopeful.
         mostFrequentMood:
           allOf:
             - $ref: "#/components/schemas/PrimaryMood"
@@ -910,33 +940,24 @@ components:
         moodEmoji:
           type: string
           nullable: true
-          example: 😴
         journalCount:
           type: integer
           minimum: 0
-          example: 17
         minimumRequired:
           type: integer
           nullable: true
-          example: 3
 
     CalendarResponse:
       type: object
-      required:
-        - month
-        - streak
-        - days
-        - monthlyRecap
+      required: [month, streak, days, monthlyRecap]
       properties:
         month:
           type: string
           pattern: "^\\d{4}-\\d{2}$"
-          example: "2026-05"
         streak:
           type: integer
           minimum: 0
-          description: Consecutive days with journal status summarized or edited.
-          example: 4
+          description: Consecutive days with status summarized or edited.
         days:
           type: array
           items:
@@ -944,56 +965,53 @@ components:
         monthlyRecap:
           $ref: "#/components/schemas/MonthlyRecapCard"
 
+    # ─────────────────────────────────────────────
+    # RECAP
+    # ─────────────────────────────────────────────
     GenerateMonthlyRecapRequest:
       type: object
-      required:
-        - month
+      required: [month]
       properties:
         month:
           type: string
           pattern: "^\\d{4}-\\d{2}$"
-          example: "2026-05"
 
     MonthlyRecap:
       type: object
       required:
-        - id
-        - userId
-        - month
-        - status
-        - title
-        - summary
-        - mostFrequentMood
-        - moodDistribution
-        - topEmotionTags
-        - topTopicTags
-        - recurringPattern
-        - monthlyInsight
-        - suggestedFocusNextMonth
-        - journalCount
-        - generatedAt
-        - updatedAt
+        [
+          id,
+          userId,
+          month,
+          status,
+          title,
+          summary,
+          mostFrequentMood,
+          moodDistribution,
+          topEmotionTags,
+          topTopicTags,
+          recurringPattern,
+          monthlyInsight,
+          suggestedFocusNextMonth,
+          journalCount,
+          generatedAt,
+          updatedAt,
+        ]
       properties:
         id:
           type: string
-          example: recap_123
         userId:
           type: string
-          example: user_123
         month:
           type: string
           pattern: "^\\d{4}-\\d{2}$"
-          example: "2026-05"
         status:
           type: string
-          enum:
-            - generated
+          enum: [generated]
         title:
           type: string
-          example: A Month of Slowing Down
         summary:
           type: string
-          example: This month, you often moved between feeling tired and hopeful.
         mostFrequentMood:
           $ref: "#/components/schemas/PrimaryMood"
         moodDistribution:
@@ -1001,11 +1019,6 @@ components:
           additionalProperties:
             type: integer
             minimum: 0
-          example:
-            tired: 8
-            anxious: 5
-            calm: 4
-            happy: 3
         topEmotionTags:
           type: array
           items:
@@ -1016,17 +1029,13 @@ components:
             $ref: "#/components/schemas/TopicTag"
         recurringPattern:
           type: string
-          example: You often felt overwhelmed when you expected yourself to handle everything at once.
         monthlyInsight:
           type: string
-          example: You seem to be learning that rest is not a failure, but part of staying steady.
         suggestedFocusNextMonth:
           type: string
-          example: Try noticing one small moment each day where you allow yourself to slow down.
         journalCount:
           type: integer
           minimum: 3
-          example: 17
         generatedAt:
           type: string
           format: date-time
@@ -1036,68 +1045,49 @@ components:
 
     MonthlyRecapNotEnoughData:
       type: object
-      required:
-        - month
-        - status
-        - journalCount
-        - minimumRequired
-        - message
+      required: [month, status, journalCount, minimumRequired, message]
       properties:
         month:
           type: string
           pattern: "^\\d{4}-\\d{2}$"
-          example: "2026-05"
         status:
           type: string
-          enum:
-            - not_enough_data
+          enum: [not_enough_data]
         journalCount:
           type: integer
           minimum: 0
-          example: 2
         minimumRequired:
           type: integer
-          example: 3
         message:
           type: string
-          example: You need at least 3 journal entries this month to generate a monthly recap.
 
     MonthlyRecapReadyToGenerate:
       type: object
-      required:
-        - month
-        - status
-        - journalCount
-        - minimumRequired
+      required: [month, status, journalCount, minimumRequired]
       properties:
         month:
           type: string
           pattern: "^\\d{4}-\\d{2}$"
-          example: "2026-05"
         status:
           type: string
-          enum:
-            - ready_to_generate
+          enum: [ready_to_generate]
         journalCount:
           type: integer
           minimum: 3
-          example: 5
         minimumRequired:
           type: integer
-          example: 3
 
+    # ─────────────────────────────────────────────
+    # SHARED
+    # ─────────────────────────────────────────────
     ErrorResponse:
       type: object
-      required:
-        - code
-        - message
+      required: [code, message]
       properties:
         code:
           type: string
-          example: BAD_REQUEST
         message:
           type: string
-          example: Invalid request.
         details:
           type: object
           additionalProperties: true

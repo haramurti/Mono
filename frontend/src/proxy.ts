@@ -1,0 +1,37 @@
+import { type NextRequest, NextResponse } from "next/server";
+
+import { hasDemoSession } from "@/shared/lib/auth";
+
+const protectedPrefixes = [
+  "/capture",
+  "/history",
+  "/dashboard",
+  "/chat",
+  "/journal",
+  "/recaps",
+  "/profile",
+];
+
+export function proxy(request: NextRequest) {
+  const isProtected = protectedPrefixes.some((prefix) =>
+    request.nextUrl.pathname.startsWith(prefix),
+  );
+
+  if (isProtected && !hasDemoSession(request)) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    "/capture/:path*",
+    "/history/:path*",
+    "/dashboard/:path*",
+    "/chat/:path*",
+    "/journal/:path*",
+    "/recaps/:path*",
+    "/profile/:path*",
+  ],
+};

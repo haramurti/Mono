@@ -1,0 +1,252 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-display);
+  --font-mono: var(--font-mono);
+  --radius-sm: calc(var(--radius) - 0.5rem);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+  --radius-2xl: calc(var(--radius) + 0.75rem);
+}
+
+:root {
+  --background: #f5f5f5;
+  --foreground: #0c0a09;
+  --card: #ffffff;
+  --card-foreground: #292524;
+  --popover: #ffffff;
+  --popover-foreground: #292524;
+  --primary: #292524;
+  --primary-foreground: #ffffff;
+  --secondary: #f0efed;
+  --secondary-foreground: #292524;
+  --muted: #fafafa;
+  --muted-foreground: #777169;
+  --accent: #f0efed;
+  --accent-foreground: #292524;
+  --destructive: #dc2626;
+  --border: #e7e5e4;
+  --input: #d6d3d1;
+  --ring: #a8c8e8;
+  --radius: 1rem;
+  --canvas-soft: #fafafa;
+  --surface-strong: #f0efed;
+  --surface-dark: #0c0a09;
+  --surface-glass: rgb(255 255 255 / 0.72);
+  --surface-glass-soft: rgb(255 255 255 / 0.84);
+  --surface-glass-strong: rgb(255 255 255 / 0.78);
+  --surface-glass-solid: rgb(255 255 255 / 0.95);
+  --text-subtle: #4e4e4e;
+  --mood-happy-surface: rgb(167 229 211 / 0.18);
+  --mood-calm-surface: rgb(168 200 232 / 0.18);
+  --mood-sad-surface: rgb(200 184 224 / 0.18);
+  --mood-angry-surface: rgb(232 184 196 / 0.22);
+  --mood-anxious-surface: rgb(244 197 168 / 0.22);
+  --mood-tired-surface: rgb(168 200 232 / 0.14);
+  --mood-confused-surface: rgb(200 184 224 / 0.16);
+  --mood-unknown-surface: rgb(240 239 237 / 0.95);
+  --gradient-mint: #a7e5d3;
+  --gradient-peach: #f4c5a8;
+  --gradient-lavender: #c8b8e0;
+  --gradient-sky: #a8c8e8;
+  --gradient-rose: #e8b8c4;
+  --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "EB Garamond", "Iowan Old Style", "Times New Roman", serif;
+  --font-mono: "Geist Mono", "SFMono-Regular", Menlo, monospace;
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mono-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mono-settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply h-full;
+  }
+
+  body {
+    min-height: 100%;
+    background:
+      radial-gradient(
+        circle at top left,
+        rgb(167 229 211 / 0.3),
+        transparent 24rem
+      ),
+      radial-gradient(
+        circle at 85% 10%,
+        rgb(244 197 168 / 0.3),
+        transparent 30rem
+      ),
+      radial-gradient(
+        circle at 70% 45%,
+        rgb(200 184 224 / 0.22),
+        transparent 24rem
+      ),
+      radial-gradient(
+        circle at 20% 80%,
+        rgb(168 200 232 / 0.22),
+        transparent 24rem
+      ), var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body), sans-serif;
+    text-rendering: optimizeLegibility;
+  }
+
+  a {
+    @apply transition-colors;
+  }
+
+  ::selection {
+    background: rgb(168 200 232 / 0.35);
+  }
+}
+
+@layer utilities {
+  .display-mega {
+    font-family: var(--font-display), "Times New Roman", serif;
+    font-size: clamp(3.75rem, 9vw, 5.25rem);
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: -0.06em;
+  }
+
+  .display-xl {
+    font-family: var(--font-display), "Times New Roman", serif;
+    font-size: clamp(2.75rem, 6vw, 4rem);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.05em;
+  }
+
+  .display-lg {
+    font-family: var(--font-display), "Times New Roman", serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+
+  .display-md {
+    font-family: var(--font-display), "Times New Roman", serif;
+    font-size: clamp(1.625rem, 3vw, 2.25rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .motion-rise {
+    animation: mono-rise 320ms var(--ease-out-quart) both;
+  }
+
+  .motion-settle {
+    animation: mono-settle 240ms var(--ease-out-quart) both;
+  }
+
+  .body-copy {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--text-subtle);
+  }
+
+  .orb-panel {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .orb-panel::before,
+  .orb-panel::after {
+    content: "";
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(40px);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .orb-panel::before {
+    inset: auto auto -3rem -4rem;
+    width: 14rem;
+    height: 14rem;
+    background: radial-gradient(circle, var(--gradient-mint), transparent 70%);
+  }
+
+  .orb-panel::after {
+    inset: -4rem -3rem auto auto;
+    width: 16rem;
+    height: 16rem;
+    background: radial-gradient(circle, var(--gradient-peach), transparent 70%);
+  }
+
+  @media (max-width: 768px) {
+    .orb-panel::before,
+    .orb-panel::after {
+      filter: blur(28px);
+      opacity: 0.42;
+    }
+  }
+}
