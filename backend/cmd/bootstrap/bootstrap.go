@@ -15,6 +15,9 @@ import (
 	journalHandler "github.com/haramurti/Mono/internal/app/journal/handler"
 	journalRepo "github.com/haramurti/Mono/internal/app/journal/repository"
 	journalService "github.com/haramurti/Mono/internal/app/journal/service"
+	recapHandler "github.com/haramurti/Mono/internal/app/recap/handler"
+	recapRepo "github.com/haramurti/Mono/internal/app/recap/repository"
+	recapService "github.com/haramurti/Mono/internal/app/recap/service"
 	"github.com/haramurti/Mono/internal/infra/database"
 	"github.com/haramurti/Mono/internal/infra/gemini"
 	"github.com/haramurti/Mono/internal/middleware"
@@ -81,13 +84,18 @@ func Init() *App {
 	)
 	chatH := chatHandler.NewChatHandler(chatSvc)
 
+	recapRepo := recapRepo.NewRecapRepository(db)
+	recapGen := gemini.NewRecapGenerator(geminiClient.RawClient())
+	recapSvc := recapService.NewRecapService(recapRepo, jRepo, recapGen)
+	recapH := recapHandler.NewRecapHandler(recapSvc)
+
 	// ─── Fiber ───
 	f := fiber.New(fiber.Config{
 		AppName: "Mono API",
 	})
 
 	jwtMiddleware := middleware.JWTMiddleware()
-	routes.SetupRoutes(f, authH, chatH, journalH, jwtMiddleware)
+	routes.SetupRoutes(f, authH, chatH, journalH, recapH, jwtMiddleware)
 
 	return &App{
 		DB:     db,
