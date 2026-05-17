@@ -226,23 +226,23 @@ export function AppShellCard({
   children: ReactNode;
   className?: string;
 }) {
-  const upperPadding = "pt-5 md:pl-7 md:pr-7 md:pt-7";
-  const lowerPadding = "pb-5 md:pl-7 md:pr-7 md:pb-7";
+  const upperPadding = "px-4 pt-5 md:px-7 md:pt-7";
+  const lowerPadding = "px-4 pb-5 md:px-7 md:pb-7";
 
   return (
     <section
       className={cn(
-        `min-h-[94dvh] rounded-2xl  border border-border/79 bg-[var(--surface-glass)]`,
+        `min-h-[94dvh] rounded-2xl border border-border/79 bg-[var(--surface-glass)]`,
         className,
       )}
     >
       <header
-        className={`rounded-tl-2xl rounded-tr-2xl mb-6 border-border/80 pb-4 sticky top-0 z-10 bg-[var(--surface-glass)] backdrop-blur-xl pt-5 shadow-xl shadow-card ${upperPadding}`}
+        className={`rounded-tl-2xl rounded-tr-2xl mb-6 border-border/80 pb-4 sticky top-0 z-10 bg-[var(--surface-glass)] backdrop-blur-xl shadow-xl shadow-card ${upperPadding}`}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div className="min-w-0">
             <h1 className="display-lg">{title}</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
               {description}
             </p>
           </div>
