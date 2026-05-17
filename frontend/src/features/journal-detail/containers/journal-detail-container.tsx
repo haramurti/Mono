@@ -104,25 +104,25 @@ export function JournalDetailContainer() {
     const isToday = date === getTodayDateKey();
 
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>
-            {isToday
-              ? "You haven't journaled today yet."
-              : "No journal found for this date."}
-          </EmptyTitle>
-          <EmptyDescription>
-            {isToday
-              ? "Start a guided conversation to capture how you're feeling."
-              : "This date does not have a saved reflection yet."}
-          </EmptyDescription>
-        </EmptyHeader>
-        <Button asChild>
-          <Link href={isToday ? "/capture" : "/history"}>
-            {isToday ? "Start journaling" : "Return to history"}
-          </Link>
-        </Button>
-      </Empty>
+       <Empty className="border-none">
+          <EmptyHeader>
+             <EmptyTitle>
+                {isToday
+                   ? "You haven't journaled today yet."
+                   : 'No journal found for this date.'}
+             </EmptyTitle>
+             <EmptyDescription>
+                {isToday
+                   ? "Start a guided conversation to capture how you're feeling."
+                   : 'This date does not have a saved reflection yet.'}
+             </EmptyDescription>
+          </EmptyHeader>
+          <Button asChild>
+             <Link href={isToday ? '/capture' : '/history'}>
+                {isToday ? 'Start journaling' : 'Return to history'}
+             </Link>
+          </Button>
+       </Empty>
     );
   }
 

@@ -21,7 +21,8 @@ export function JournalChatHeader({
    return (
       <header className="flex items-start justify-between gap-3 shadow-2xl shadow-card z-10">
          <div className="flex min-w-0 flex-wrap items-center gap-2 md:gap-3">
-            <p className="display-md">Today's journal</p>
+            {/* <p className="display-md">Today's journal</p> */}
+            <p className="display-md">Capture your thoughts</p>
             <span className="ml-6 space-x-6">
                <Badge variant={'ghost'}>{dateLabel}</Badge>
                <Badge variant={moodVariant}>{moodLabel}</Badge>
