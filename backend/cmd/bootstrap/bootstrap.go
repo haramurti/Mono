@@ -12,6 +12,9 @@ import (
 	chatHandler "github.com/haramurti/Mono/internal/app/chat/handler"
 	chatRepo "github.com/haramurti/Mono/internal/app/chat/repository"
 	chatService "github.com/haramurti/Mono/internal/app/chat/service"
+	journalHandler "github.com/haramurti/Mono/internal/app/journal/handler"
+	journalRepo "github.com/haramurti/Mono/internal/app/journal/repository"
+	journalService "github.com/haramurti/Mono/internal/app/journal/service"
 	"github.com/haramurti/Mono/internal/infra/database"
 	"github.com/haramurti/Mono/internal/infra/gemini"
 	"github.com/haramurti/Mono/internal/middleware"
@@ -50,16 +53,31 @@ func Init() *App {
 		log.Fatalf("failed to init gemini: %v", err)
 	}
 
-	// ─── Chat ───
+	// ─── Repos bersama ───
 	sessionRepo := chatRepo.NewChatSessionRepository(db)
 	messageRepo := chatRepo.NewChatMessageRepository(db)
-	memoryRepo := chatRepo.NewUserMemoryRepository(db)
+	memoryRepo := authRepo.NewUserMemoryRepository(db)
+
+	// ─── Journal ───
+	jRepo := journalRepo.NewJournalRepository(db)
+	jSummarizer := gemini.NewJournalSummarizer(geminiClient.RawClient())
+	jSvc := journalService.NewJournalService(
+		jRepo,
+		jSummarizer,
+		sessionRepo,
+		messageRepo,
+		memoryRepo,
+		geminiClient,
+	)
+	journalH := journalHandler.NewJournalHandler(jSvc)
+
+	// ─── Chat (inject getRecentSnippets dari journal service) ───
 	chatSvc := chatService.NewChatService(
 		sessionRepo,
 		messageRepo,
 		memoryRepo,
 		geminiClient,
-		nil, // getRecentJournals: akan di-inject setelah journal domain selesai
+		jSvc.GetRecentSnippets, // ← hybrid memory layer 3 aktif
 	)
 	chatH := chatHandler.NewChatHandler(chatSvc)
 
@@ -69,7 +87,7 @@ func Init() *App {
 	})
 
 	jwtMiddleware := middleware.JWTMiddleware()
-	routes.SetupRoutes(f, authH, chatH, jwtMiddleware)
+	routes.SetupRoutes(f, authH, chatH, journalH, jwtMiddleware)
 
 	return &App{
 		DB:     db,

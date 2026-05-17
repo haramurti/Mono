@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"github.com/google/uuid"
 	"github.com/haramurti/Mono/internal/app/Users/contract"
 	"github.com/haramurti/Mono/internal/app/Users/entity"
 )
@@ -97,4 +98,42 @@ func (r *refreshTokenRepository) DeleteAllByUserID(ctx context.Context, userID s
 	return r.db.WithContext(ctx).
 		Where("user_id = ?", userID).
 		Delete(&entity.RefreshToken{}).Error
+}
+
+// tambah di bawah refreshTokenRepository
+
+type userMemoryRepository struct {
+	db *gorm.DB
+}
+
+func NewUserMemoryRepository(db *gorm.DB) contract.UserMemoryRepository {
+	return &userMemoryRepository{db: db}
+}
+
+func (r *userMemoryRepository) FindByUserID(ctx context.Context, userID string) (*entity.UserMemory, error) {
+	var mem entity.UserMemory
+	err := r.db.WithContext(ctx).
+		Where("user_id = ?", userID).
+		First(&mem).Error
+
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &mem, nil
+}
+
+func (r *userMemoryRepository) Upsert(ctx context.Context, userID string, summary string) error {
+	parsedID, err := uuid.Parse(userID)
+	if err != nil {
+		return err
+	}
+
+	var mem entity.UserMemory
+	return r.db.WithContext(ctx).
+		Where(entity.UserMemory{UserID: parsedID}).
+		Assign(entity.UserMemory{Summary: summary}).
+		FirstOrCreate(&mem).Error
 }
