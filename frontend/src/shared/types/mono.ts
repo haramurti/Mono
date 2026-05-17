@@ -51,7 +51,7 @@ export type User = {
   id: string;
   email: string;
   name: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   createdAt: string;
   lastLoginAt: string;
 };
@@ -172,12 +172,4 @@ export type CalendarResponse = {
   streak: number;
   days: CalendarDay[];
   monthlyRecap: MonthlyRecapCard;
-};
-
-export type TodayChatResponse = {
-  date: string;
-  initialMood: Mood | null;
-  messages: ChatMessage[];
-  actions: ChatActions;
-  journalState: JournalState;
 };

@@ -20,7 +20,6 @@ import type {
   MonthlyRecapResponse,
   Mood,
   SafetyFlag,
-  TodayChatResponse,
   TopicTag,
   User,
 } from "@/shared/types/mono";
@@ -455,6 +454,10 @@ function getStore() {
   return globalThis.__MONO_DEMO_STORE__;
 }
 
+export function resetStore() {
+  globalThis.__MONO_DEMO_STORE__ = createInitialStore();
+}
+
 function buildJournalState(date: string, journal?: Journal): JournalState {
   const messages = getStore().chatsByDate[date] ?? [];
   const isContinuation =
@@ -527,15 +530,12 @@ export function getCurrentUser() {
   return getStore().user;
 }
 
-export function getTodayChat(): TodayChatResponse {
+export function getTodayChat() {
   const store = getStore();
   const journal = store.journalsByDate[TODAY];
 
   return {
-    date: TODAY,
-    initialMood: journal?.primaryMood ?? null,
     messages: store.chatsByDate[TODAY] ?? [],
-    actions: buildActions(TODAY, journal),
     journalState: buildJournalState(TODAY, journal),
   };
 }
@@ -554,10 +554,6 @@ export function sendChatMessage({
   }
 
   const messages = store.chatsByDate[TODAY];
-  const isMoodBootstrap =
-    Boolean(initialMood) &&
-    messages.length === 0 &&
-    !messages.some((message) => message.role === "user");
 
   const language = detectLanguage([
     ...messages
@@ -566,15 +562,13 @@ export function sendChatMessage({
     content,
   ]);
 
-  if (!isMoodBootstrap) {
-    messages.push({
-      id: `msg_${crypto.randomUUID()}`,
-      journalId: journal.id,
-      role: "user",
-      content,
-      createdAt: new Date().toISOString(),
-    });
-  }
+  messages.push({
+    id: `msg_${crypto.randomUUID()}`,
+    journalId: journal.id,
+    role: "user",
+    content,
+    createdAt: new Date().toISOString(),
+  });
 
   if (initialMood) {
     journal.primaryMood = initialMood;

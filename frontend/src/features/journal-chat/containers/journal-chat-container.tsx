@@ -23,6 +23,8 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 export function JournalChatContainer() {
   const {
     chat,
+    initialMood,
+    actions,
     closeToolsSheet,
     draft,
     changeDraft,
@@ -41,31 +43,29 @@ export function JournalChatContainer() {
     user,
   } = useJournalChatController();
 
-  const moodBadge = getMoodBadgeProps(chat?.initialMood);
+  const moodBadge = getMoodBadgeProps(initialMood);
   const messageItems = mapChatMessagesForDisplay(chat?.messages, user?.name);
   const userMessageCount = chat?.journalState.userMessageCount ?? 0;
 
   const helperText = getHelperText({
-    canSummarize: chat?.actions.canSummarize,
-    initialMood: chat?.initialMood,
+    canSummarize: actions?.canSummarize,
+    initialMood,
     isLoading: isChatLoading,
     userMessageCount,
   });
 
   const showSummaryOffer = shouldShowSummaryOffer({
     offerDismissed: isSummaryOfferDismissed,
-    shouldOfferSummary: chat?.actions.shouldOfferSummary,
+    shouldOfferSummary: actions?.shouldOfferSummary,
   });
 
-  const isComposerDisabled = !chat?.initialMood || isBusy;
+  const isComposerDisabled = !initialMood || isBusy;
   const isSendDisabled = !draft.trim() || isBusy;
   const isSummarizeDisabled =
-    !chat?.initialMood || !chat?.actions.canSummarize || isBusy;
-  const moodPickerDisabled = Boolean(chat?.initialMood) || isBusy;
+    !initialMood || !actions?.canSummarize || isBusy;
+  const moodPickerDisabled = Boolean(initialMood) || isBusy;
 
-  const toolsSummaryStateLabel = getSummaryStateLabel(
-    chat?.actions.canSummarize,
-  );
+  const toolsSummaryStateLabel = getSummaryStateLabel(actions?.canSummarize);
 
   function renderToolsSheetContent() {
     if (isChatLoading) {
@@ -84,7 +84,7 @@ export function JournalChatContainer() {
     return (
       <>
         <MoodPicker
-          value={chat?.initialMood ?? null}
+          value={initialMood}
           onSelect={selectMood}
           disabled={moodPickerDisabled}
         />
@@ -99,52 +99,48 @@ export function JournalChatContainer() {
     );
   }
 
-  function renderEmptyStateToolsContent() {
-     if (isChatLoading) {
-        return (
-           <div className="grid w-full max-w-sm grid-cols-4 gap-2">
-              {Array.from({ length: 8 }, (_, index) => (
-                 <Skeleton
-                    key={`empty-mood-skeleton-${index + 1}`}
-                    className="h-16 rounded-xl"
-                 />
-              ))}
-           </div>
-        );
-     }
-
-     return (
-        <div className="motion-settle mx-auto flex w-full max-w-sm flex-col gap-5 p-4">
-           <div className="space-y-1 text-center">
-              <h2 className="text-sm font-medium text-foreground">
-                 How are you feeling today?
-              </h2>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                 Pick a mood to begin.
-              </p>
-           </div>
-
-           <MoodPicker
-              value={chat?.initialMood ?? null}
-              onSelect={selectMood}
-              disabled={moodPickerDisabled}
-           />
-
-           {showSummaryOffer ? (
-              <JournalChatSummaryOffer
-                 onDismiss={dismissSummaryOffer}
-                 onSummarize={summarizeJournal}
-              />
-           ) : null}
-        </div>
-     );
-  }
-
   function renderEmptyState() {
+    if (isChatLoading) {
+      return (
+        <div className="flex flex-1 items-center justify-center px-4 py-8">
+          <div className="grid w-full max-w-sm grid-cols-4 gap-2">
+            {Array.from({ length: 8 }, (_, index) => (
+              <Skeleton
+                key={`empty-mood-skeleton-${index + 1}`}
+                className="h-16 rounded-xl"
+              />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     return (
-       <div className="flex flex-1 items-center justify-center px-4 py-8">
-          {renderEmptyStateToolsContent()}
-       </div>
+      <div className="flex flex-1 items-center justify-center px-4 py-8">
+        <div className="mx-auto flex w-full max-w-sm flex-col gap-5 p-4">
+          <div className="space-y-1 text-center">
+            <h2 className="text-sm font-medium text-foreground">
+              How are you feeling today?
+            </h2>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Pick a mood to begin.
+            </p>
+          </div>
+
+          <MoodPicker
+            value={initialMood}
+            onSelect={selectMood}
+            disabled={moodPickerDisabled}
+          />
+
+          {showSummaryOffer ? (
+            <JournalChatSummaryOffer
+              onDismiss={dismissSummaryOffer}
+              onSummarize={summarizeJournal}
+            />
+          ) : null}
+        </div>
+      </div>
     );
   }
 

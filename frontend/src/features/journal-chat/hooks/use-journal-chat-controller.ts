@@ -1,52 +1,30 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { useJournalChatSearchParams } from "@/features/journal-chat/hooks/use-journal-chat-search-params";
-import {
-  buildInitialMoodMessage,
-  getJournalHref,
-  shouldRedirectToJournal,
-} from "@/features/journal-chat/lib/journal-chat-display";
+import { deriveActions } from "@/features/journal-chat/lib/journal-chat-display";
 import { toast } from "@/shared/components/ui/sonner";
+import { getTodayDateKey } from "@/shared/lib/date";
 import { useCurrentUserQuery } from "@/shared/repository/auth/query";
 import {
   useSendChatMessageMutation,
   useTodayChatQuery,
 } from "@/shared/repository/chat/query";
-import { useSummarizeTodayJournalMutation } from "@/shared/repository/journals/query";
+import {
+  useJournalByDateQuery,
+  useSummarizeTodayJournalMutation,
+} from "@/shared/repository/journals/query";
 import type { Mood } from "@/shared/types/mono";
-
-function addEscapeListener(onEscape: () => void) {
-  const handleEscape = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      onEscape();
-    }
-  };
-
-  window.addEventListener("keydown", handleEscape);
-
-  return () => {
-    window.removeEventListener("keydown", handleEscape);
-  };
-}
-
-function lockBodyScroll() {
-  const previousOverflow = document.body.style.overflow;
-  document.body.style.overflow = "hidden";
-
-  return () => {
-    document.body.style.overflow = previousOverflow;
-  };
-}
 
 export function useJournalChatController() {
   const router = useRouter();
+  const today = getTodayDateKey();
+
   const [draft, setDraft] = useState("");
+  const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [isToolsSheetOpen, setIsToolsSheetOpen] = useState(false);
   const [isSummaryOfferDismissed, setIsSummaryOfferDismissed] = useState(false);
-  const { isContinuing, setIsContinuing } = useJournalChatSearchParams();
 
   const userQuery = useCurrentUserQuery();
   const todayChatQuery = useTodayChatQuery();
@@ -54,40 +32,35 @@ export function useJournalChatController() {
   const summarizeMutation = useSummarizeTodayJournalMutation();
 
   const chat = todayChatQuery.data;
-  const journalHref = getJournalHref(chat);
+  const journalExists =
+    chat?.journalState.status === "in_progress" ||
+    chat?.journalState.status === "summarized" ||
+    chat?.journalState.status === "edited";
+
+  const todayJournalQuery = useJournalByDateQuery(journalExists ? today : "");
+
+  // Source of truth for the current mood:
+  // - When the journal exists, read from journal.primaryMood (spec-compliant).
+  // - Otherwise, fall back to local selectedMood (chosen but not yet persisted).
+  const journalMood = todayJournalQuery.data?.primaryMood ?? null;
+  const initialMood = journalMood ?? selectedMood;
+
+  const actions = useMemo(
+    () => (chat ? deriveActions(chat.journalState) : undefined),
+    [chat],
+  );
 
   useEffect(() => {
-    if (!isContinuing && shouldRedirectToJournal(chat) && journalHref) {
-      router.replace(journalHref);
-    }
-  }, [chat, isContinuing, journalHref, router]);
-
-  useEffect(() => {
-    if (!isContinuing) {
-      return;
-    }
-
-    if (
-      chat?.journalState.status === "in_progress" ||
-      chat?.journalState.status === "empty"
-    ) {
-      void setIsContinuing(null);
-    }
-  }, [chat?.journalState.status, isContinuing, setIsContinuing]);
-
-  useEffect(() => {
-    if (!isToolsSheetOpen) {
-      return;
-    }
-
-    const unlockBodyScroll = lockBodyScroll();
-    const removeEscapeListener = addEscapeListener(() => {
-      setIsToolsSheetOpen(false);
-    });
-
+    if (!isToolsSheetOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsToolsSheetOpen(false);
+    };
+    window.addEventListener("keydown", onEsc);
     return () => {
-      unlockBodyScroll();
-      removeEscapeListener();
+      document.body.style.overflow = prev;
+      window.removeEventListener("keydown", onEsc);
     };
   }, [isToolsSheetOpen]);
 
@@ -112,33 +85,26 @@ export function useJournalChatController() {
   }
 
   function selectMood(mood: Mood) {
-    if (chat?.initialMood || sendMessageMutation.isPending) {
-      return;
-    }
-
-    resetSummaryOffer();
+    if (journalMood || sendMessageMutation.isPending) return;
+    setSelectedMood(mood);
     closeToolsSheet();
-    sendMessageMutation.mutate({
-      content: buildInitialMoodMessage(mood),
-      initialMood: mood,
-    });
   }
 
   function sendMessage() {
     const content = draft.trim();
-
-    if (!content) {
-      return;
-    }
+    if (!content) return;
+    if (!initialMood) return;
 
     resetSummaryOffer();
+    // Only attach initialMood on the very first POST for this journal.
+    // Once the journal has primaryMood, subsequent sends omit it.
+    const includeMood = !journalMood;
+
     sendMessageMutation.mutate(
-      { content },
-      {
-        onSuccess: () => {
-          setDraft("");
-        },
-      },
+      includeMood
+        ? { content, initialMood: selectedMood ?? initialMood }
+        : { content },
+      { onSuccess: () => setDraft("") },
     );
   }
 
@@ -148,7 +114,7 @@ export function useJournalChatController() {
         router.push(`/journal/${journal.date}`);
       },
       onError: () => {
-        toast.error("Couldn’t summarize your journal.", {
+        toast.error("Couldn't summarize your journal.", {
           description: "Your chat is saved. Try again in a moment.",
         });
       },
@@ -162,6 +128,8 @@ export function useJournalChatController() {
 
   return {
     chat,
+    initialMood,
+    actions,
     closeToolsSheet,
     draft,
     changeDraft,

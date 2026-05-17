@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { useAuthStore } from "@/shared/lib/auth-store";
 import { getCurrentUser, logout } from "@/shared/repository/auth/action";
 
 export const authQueryKeys = {
@@ -17,10 +18,12 @@ export function useCurrentUserQuery() {
 
 export function useLogoutMutation() {
   const queryClient = useQueryClient();
+  const clearTokens = useAuthStore((s) => s.clearTokens);
 
   return useMutation({
     mutationFn: logout,
     onSuccess: () => {
+      clearTokens();
       queryClient.clear();
     },
   });

@@ -16,10 +16,8 @@ export type SendChatMessageResponseDto = {
   journalState: JournalState;
 };
 
-export type TodayChatResponseDto = {
-  date: string;
-  initialMood: Mood | null;
+// Aligned with OpenAPI GET /chat/messages response
+export type GetChatMessagesResponseDto = {
   messages: ChatMessage[];
-  actions: ChatActions;
   journalState: JournalState;
 };

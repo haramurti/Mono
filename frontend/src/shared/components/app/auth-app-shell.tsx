@@ -9,6 +9,7 @@ import {
 import Link, { type LinkProps } from "next/link";
 import type { ReactNode } from "react";
 
+import AppLogo from "@/shared/components/app/app-logo";
 import {
   Tooltip,
   TooltipContent,
@@ -186,7 +187,13 @@ export function AppShellLayout({
     <div className="min-h-screen bg-background pb-28 md:pb-0">
       <div className="mx-auto flex w-full max-w-7xl gap-4 px-3 py-4 md:px-6 md:py-6">
         <aside className="sticky top-6 hidden h-[calc(100dvh-3rem)] w-20 self-start flex-col items-center rounded-2xl border border-border/80 bg-[var(--surface-glass-strong)] py-5 md:flex">
-          <div className="mb-6 size-10 rounded-full bg-secondary" />
+          <Link
+            href="/"
+            aria-label="Mono home"
+            className="mb-6 flex size-10 items-center justify-center"
+          >
+            <AppLogo className="size-9" />
+          </Link>
 
           <AppNav
             items={navItems}

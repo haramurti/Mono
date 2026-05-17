@@ -1,7 +1,11 @@
 import { formatLongDate, getTodayDateKey } from "@/shared/lib/date";
 import { moodMeta } from "@/shared/lib/moods";
-import type { TodayChatResponseDto } from "@/shared/repository/chat/dto";
-import type { ChatMessage, Mood } from "@/shared/types/mono";
+import type {
+  ChatActions,
+  ChatMessage,
+  JournalState,
+  Mood,
+} from "@/shared/types/mono";
 
 export type JournalChatMessageItem = {
   id: string;
@@ -10,19 +14,16 @@ export type JournalChatMessageItem = {
   avatarFallback: string;
 };
 
-export function buildInitialMoodMessage(mood: Mood) {
-  return `I feel ${mood} today.`;
+export function deriveActions(journalState: JournalState): ChatActions {
+  return {
+    canSummarize: journalState.userMessageCount >= 3,
+    shouldOfferSummary: journalState.userMessageCount >= 5,
+    safetyFlag: "none",
+  };
 }
 
 export function getChatDateLabel() {
   return formatLongDate(getTodayDateKey());
-}
-
-export function getJournalHref(chat: TodayChatResponseDto | undefined) {
-  return chat?.journalState.status === "summarized" ||
-    chat?.journalState.status === "edited"
-    ? `/journal/${chat.date}`
-    : undefined;
 }
 
 export function getMoodBadgeProps(initialMood: Mood | null | undefined) {
@@ -87,12 +88,6 @@ export function mapChatMessagesForDisplay(
       avatarFallback: message.role === "assistant" ? "MO" : userInitials,
     })) ?? []
   );
-}
-
-export function shouldRedirectToJournal(
-  chat: TodayChatResponseDto | undefined,
-) {
-  return Boolean(getJournalHref(chat));
 }
 
 export function shouldShowSummaryOffer({

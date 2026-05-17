@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 
+import AppLogo from "@/shared/components/app/app-logo";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
@@ -41,9 +42,7 @@ export function LandingPage() {
         <header className="border-b border-border/70 pb-5 md:pb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <span className="grid size-9 place-items-center rounded-xl bg-foreground text-sm font-semibold text-background">
-                M
-              </span>
+              <AppLogo className="size-9" />
               <span className="text-sm font-semibold tracking-tight">Mono</span>
             </Link>
 
@@ -58,13 +57,13 @@ export function LandingPage() {
 
             <div className="flex items-center gap-2 text-sm sm:gap-3">
               <Link
-                href="/api/demo-login"
+                href="/login"
                 className="inline-flex h-10 items-center rounded-full px-3 py-2 text-muted-foreground transition-colors hover:bg-background/60 hover:text-foreground"
               >
                 Login
               </Link>
               <Button asChild size="sm">
-                <Link href="/api/demo-login">Start reflection</Link>
+                <Link href="/signup">Sign up</Link>
               </Button>
             </div>
           </div>
@@ -105,7 +104,7 @@ export function LandingPage() {
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg">
-                  <Link href="/api/demo-login">
+                  <Link href="/login">
                     Start reflection
                     <ArrowRightIcon data-icon="inline-end" />
                   </Link>
@@ -308,7 +307,7 @@ export function LandingPage() {
                 </p>
 
                 <Button asChild size="lg" className="mt-6 w-fit">
-                  <Link href="/api/demo-login">
+                  <Link href="/login">
                     Start reflection
                     <ArrowRightIcon data-icon="inline-end" />
                   </Link>

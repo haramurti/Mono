@@ -1,8 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { hasDemoSession } from "@/shared/lib/auth";
-import { sendChatMessage } from "@/shared/lib/demo-store";
+import { getTodayChat, sendChatMessage } from "@/shared/lib/demo-store";
 import type { SendChatMessageRequestDto } from "@/shared/repository/chat/dto";
 import { moods } from "@/shared/types/mono";
+
+export function GET(request: NextRequest) {
+  if (!hasDemoSession(request)) {
+    return NextResponse.json(
+      { code: "UNAUTHORIZED", message: "Authentication is required." },
+      { status: 401 },
+    );
+  }
+  return NextResponse.json(getTodayChat());
+}
 
 export async function POST(request: NextRequest) {
   if (!hasDemoSession(request)) {

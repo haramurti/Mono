@@ -1,5 +1,5 @@
 import { getTodayDateKey } from "@/shared/lib/date";
-import type { TodayChatResponseDto } from "@/shared/repository/chat/dto";
+import type { GetChatMessagesResponseDto } from "@/shared/repository/chat/dto";
 
 export function getTodayCta(status: string | undefined) {
   if (status === "in_progress") {
@@ -27,11 +27,11 @@ export function getDashboardTitle(userName: string | undefined) {
 }
 
 export function getDashboardJournalHref(
-  todayChat: TodayChatResponseDto | undefined,
+  todayChat: GetChatMessagesResponseDto | undefined,
 ) {
   return todayChat?.journalState.status === "summarized" ||
     todayChat?.journalState.status === "edited"
-    ? `/journal/${todayChat.date}`
+    ? `/journal/${todayChat.journalState.date}`
     : undefined;
 }
 

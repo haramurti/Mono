@@ -41,7 +41,7 @@ export function ProfileCard({
       <CardContent className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
           <Avatar size="lg">
-            <AvatarImage src={user.avatarUrl} alt={user.name} />
+            <AvatarImage src={user.avatarUrl ?? undefined} alt={user.name} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="grid gap-1 text-sm text-muted-foreground">

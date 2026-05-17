@@ -1,11 +1,8 @@
 import type { ReactNode } from "react";
 
 import type { JournalChatMessageItem } from "@/features/journal-chat/lib/journal-chat-display";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/shared/components/ui/avatar";
+import AppLogo from "@/shared/components/app/app-logo";
+import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
 
@@ -30,12 +27,12 @@ function JournalChatMessageRow({
     >
       <Avatar className="mt-1 size-10">
         {isAssistant ? (
-          <AvatarImage
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80"
-            alt="Mono"
-          />
-        ) : null}
-        <AvatarFallback>{avatarFallback}</AvatarFallback>
+          <AvatarFallback className="bg-background">
+            <AppLogo className="size-7" />
+          </AvatarFallback>
+        ) : (
+          <AvatarFallback>{avatarFallback}</AvatarFallback>
+        )}
       </Avatar>
       <div
         className={cn(

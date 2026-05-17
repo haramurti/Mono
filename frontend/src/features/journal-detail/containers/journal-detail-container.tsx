@@ -75,7 +75,7 @@ export function JournalDetailContainer() {
         </Button>
         {canContinueJournaling ? (
           <Button asChild variant="outline">
-            <Link href="/capture?continue=true">
+            <Link href="/capture">
               <PlayIcon data-icon="inline-start" />
               Continue journaling
             </Link>

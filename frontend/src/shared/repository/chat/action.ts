@@ -1,12 +1,13 @@
 import { apiClient } from "@/shared/lib/axios";
 import type {
+  GetChatMessagesResponseDto,
   SendChatMessageRequestDto,
   SendChatMessageResponseDto,
-  TodayChatResponseDto,
 } from "./dto";
 
 export async function getTodayChat() {
-  const response = await apiClient.get<TodayChatResponseDto>("/chat/today");
+  const response =
+    await apiClient.get<GetChatMessagesResponseDto>("/chat/messages");
   return response.data;
 }
 
