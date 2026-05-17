@@ -6,7 +6,7 @@ import {
    SparklesIcon,
    UserIcon,
 } from 'lucide-react';
-import Link from "next/link";
+import Link, { type LinkProps } from 'next/link';
 import type { ReactNode } from "react";
 
 import {
@@ -19,10 +19,11 @@ import { cn } from "@/shared/lib/utils";
 import type { AppSection } from "@/shared/types/app";
 
 type NavItem = {
-  key: AppSection;
-  label: string;
-  icon: ReactNode;
-  href?: string;
+   key: AppSection;
+   label: string;
+   icon: ReactNode;
+   href?: string;
+   config: Omit<LinkProps, 'href'>;
 };
 
 function getNavItems(journalHref?: string): NavItem[] {
@@ -32,24 +33,36 @@ function getNavItems(journalHref?: string): NavItem[] {
         label: 'Capture',
         href: '/capture',
         icon: <SparklesIcon className="size-4" aria-hidden="true" />,
+        config: {
+           prefetch: true,
+        },
      },
      {
         key: 'history',
         label: 'History',
         href: '/history',
         icon: <CalendarDaysIcon className="size-4" aria-hidden="true" />,
+        config: {
+           prefetch: true,
+        },
      },
      {
         key: 'journal',
         label: 'Journal',
         href: journalHref,
         icon: <BookMarkedIcon className="size-4" aria-hidden="true" />,
+        config: {
+           prefetch: true,
+        },
      },
      {
         key: 'profile',
         label: 'Profile',
         href: '/profile',
         icon: <UserIcon className="size-4" aria-hidden="true" />,
+        config: {
+           prefetch: true,
+        },
      },
   ];
 }
@@ -221,8 +234,8 @@ export function AppShellCard({
   children: ReactNode;
   className?: string;
 }) {
-   const upperPadding = 'pt-5 md:pl-7 md:pr-7 md:pt-7';
-   const lowerPadding = 'pb-5 md:pl-7 md:pr-7 md:pb-7';
+  const upperPadding = 'pt-5 md:pl-7 md:pr-7 md:pt-7';
+  const lowerPadding = 'pb-5 md:pl-7 md:pr-7 md:pb-7';
 
   return (
      <section

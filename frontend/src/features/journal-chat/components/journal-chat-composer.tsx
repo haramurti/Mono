@@ -30,6 +30,12 @@ export function JournalChatComposer({
           id="journal-message"
           value={draft}
           onChange={(event) => onDraftChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              if (!isSendDisabled) onSend();
+            }
+          }}
           placeholder="Write a little more about what happened, what stayed with you, or what feels unfinished."
           disabled={isComposerDisabled}
           className="min-h-24 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"

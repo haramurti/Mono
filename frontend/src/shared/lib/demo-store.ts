@@ -456,13 +456,16 @@ function getStore() {
 }
 
 function buildJournalState(date: string, journal?: Journal): JournalState {
-  return {
-    date,
-    status: journal?.status ?? "empty",
-    userMessageCount: (getStore().chatsByDate[date] ?? []).filter(
-      (message) => message.role === "user",
-    ).length,
-  };
+  const messages = getStore().chatsByDate[date] ?? [];
+  const isContinuation =
+    journal?.summarizedAt && journal.status === "in_progress";
+  const userMessageCount = messages.filter((m) => {
+    if (m.role !== "user") return false;
+    if (isContinuation) return m.createdAt > journal.summarizedAt!;
+    return true;
+  }).length;
+
+  return { date, status: journal?.status ?? "empty", userMessageCount };
 }
 
 function buildActions(date: string, journal?: Journal): ChatActions {
