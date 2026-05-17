@@ -23,7 +23,7 @@ function JournalChatMessageRow({
   return (
     <div
       className={cn(
-        "flex min-w-0 gap-3",
+        "motion-rise flex min-w-0 gap-3",
         !isAssistant && "flex-row-reverse",
         isAssistant ? "mt-4" : "mt-8",
       )}

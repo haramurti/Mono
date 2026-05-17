@@ -15,7 +15,7 @@ export function JournalChatSummaryError({
   onRetry,
 }: JournalChatSummaryErrorProps) {
   return (
-    <Alert variant="destructive" className="mt-4">
+    <Alert variant="destructive" className="motion-settle mt-4">
       <AlertTitle>Couldn’t summarize your journal.</AlertTitle>
       <AlertDescription>
         Your chat is still saved safely. Try again when you’re ready.

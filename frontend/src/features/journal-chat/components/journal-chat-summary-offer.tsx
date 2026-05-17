@@ -12,7 +12,7 @@ export function JournalChatSummaryOffer({
   onSummarize,
 }: JournalChatSummaryOfferProps) {
   return (
-    <div className="rounded-[1.1rem] border border-border/70 bg-secondary/35 p-3">
+    <div className="motion-settle rounded-[1.1rem] border border-border/70 bg-secondary/35 p-3">
       <p className="text-sm text-card-foreground">
         Ready to summarize whenever you feel done.
       </p>

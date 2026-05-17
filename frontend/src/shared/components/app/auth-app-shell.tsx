@@ -250,7 +250,7 @@ export function AppShellCard({
           {action}
         </div>
       </header>
-      <div className={lowerPadding}>{children}</div>
+      <div className={cn("motion-settle", lowerPadding)}>{children}</div>
     </section>
   );
 }

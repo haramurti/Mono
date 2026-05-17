@@ -45,7 +45,7 @@ export function JournalChatToolsSheet({
         aria-modal="true"
         aria-labelledby="capture-tools-title"
         className={cn(
-          "absolute inset-x-0 bottom-0 max-h-[82dvh] overflow-y-auto rounded-t-[1.5rem] border border-border/80 bg-background p-4 shadow-[0_-20px_50px_rgba(12,10,9,0.14)] transition-transform duration-200 ease-out md:inset-y-6 md:left-auto md:right-6 md:w-[30rem] md:max-h-none md:rounded-2xl md:p-5",
+          "absolute inset-x-0 bottom-0 max-h-[82dvh] overflow-y-auto rounded-t-[1.5rem] border border-border/80 bg-background p-4 shadow-[0_-20px_50px_rgba(12,10,9,0.14)] transition-transform duration-300 [transition-timing-function:var(--ease-out-quart)] md:inset-y-6 md:left-auto md:right-6 md:w-[30rem] md:max-h-none md:rounded-2xl md:p-5",
           isOpen
             ? "translate-y-0"
             : "translate-y-full md:translate-x-6 md:translate-y-0",

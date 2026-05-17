@@ -76,7 +76,7 @@ function buildCellClassName({
   isToday: boolean;
 }) {
   return cn(
-    "flex min-h-[6.8rem] flex-col rounded-[1.1rem] border border-border/80 bg-card/75 p-2.5 text-left transition-colors md:min-h-[8.1rem] md:p-3",
+    "flex min-h-[6.8rem] flex-col rounded-[1.1rem] border border-border/80 bg-card/75 p-2.5 text-left transition-[colors,transform] duration-200 ease-out md:min-h-[8.1rem] md:p-3",
     !isCurrentMonth && "opacity-45",
     isDisabled && "cursor-not-allowed opacity-45",
     isToday && "border-foreground/20 bg-[var(--surface-glass-solid)]",
@@ -140,7 +140,11 @@ export function DashboardCalendarCell({
 
   if (href) {
     return (
-      <Link href={href} className="block" aria-label={ariaLabel}>
+      <Link
+        href={href}
+        className="block transition-transform duration-200 ease-out hover:-translate-y-0.5"
+        aria-label={ariaLabel}
+      >
         <div className={cellClassName}>{inner}</div>
       </Link>
     );

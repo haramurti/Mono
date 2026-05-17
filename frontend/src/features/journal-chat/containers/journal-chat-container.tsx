@@ -70,11 +70,11 @@ export function JournalChatContainer() {
   function renderToolsSheetContent() {
     if (isChatLoading) {
       return (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-4 gap-2">
           {Array.from({ length: 8 }, (_, index) => (
             <Skeleton
               key={`mood-skeleton-${index + 1}`}
-              className="h-20 rounded-xl"
+              className="h-16 rounded-xl"
             />
           ))}
         </div>
@@ -102,11 +102,11 @@ export function JournalChatContainer() {
   function renderEmptyStateToolsContent() {
      if (isChatLoading) {
         return (
-           <div className="grid w-full max-w-md grid-cols-2 gap-3">
+           <div className="grid w-full max-w-sm grid-cols-4 gap-2">
               {Array.from({ length: 8 }, (_, index) => (
                  <Skeleton
                     key={`empty-mood-skeleton-${index + 1}`}
-                    className="h-20 rounded-xl"
+                    className="h-16 rounded-xl"
                  />
               ))}
            </div>
@@ -114,14 +114,13 @@ export function JournalChatContainer() {
      }
 
      return (
-        <div className="mx-auto flex w-full max-w-md flex-col gap-4 rounded-2xl bg-card/60 p-4">
+        <div className="motion-settle mx-auto flex w-full max-w-sm flex-col gap-5 p-4">
            <div className="space-y-1 text-center">
-              <h2 className="text-base font-medium text-foreground">
+              <h2 className="text-sm font-medium text-foreground">
                  How are you feeling today?
               </h2>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                 Pick a mood to start your journal check-in, then write whatever
-                 feels most true.
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                 Pick a mood to begin.
               </p>
            </div>
 

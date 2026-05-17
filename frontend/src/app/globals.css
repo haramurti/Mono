@@ -75,6 +75,41 @@
   --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   --font-display: "EB Garamond", "Iowan Old Style", "Times New Roman", serif;
   --font-mono: "Geist Mono", "SFMono-Regular", Menlo, monospace;
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mono-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes mono-settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer base {
@@ -162,6 +197,14 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--muted-foreground);
+  }
+
+  .motion-rise {
+    animation: mono-rise 320ms var(--ease-out-quart) both;
+  }
+
+  .motion-settle {
+    animation: mono-settle 240ms var(--ease-out-quart) both;
   }
 
   .body-copy {

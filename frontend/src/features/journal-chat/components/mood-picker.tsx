@@ -5,7 +5,6 @@ import {
   ToggleGroupItem,
 } from "@/shared/components/ui/toggle-group";
 import { moodMeta } from "@/shared/lib/moods";
-import { cn } from "@/shared/lib/utils";
 import { type Mood, moods } from "@/shared/types/mono";
 
 export function MoodPicker({
@@ -27,7 +26,7 @@ export function MoodPicker({
         }
       }}
       spacing={2}
-      className="grid w-full grid-cols-2 gap-3 md:grid-cols-4"
+      className="grid w-full grid-cols-4 gap-2"
       disabled={disabled}
     >
       {moods.map((mood) => (
@@ -35,19 +34,11 @@ export function MoodPicker({
           key={mood}
           value={mood}
           variant="outline"
-          className={cn(
-            "h-auto min-w-0 flex-col items-start gap-3 rounded-[1rem] px-4 py-3 text-left",
-            moodMeta[mood].surfaceClass,
-          )}
+          className="h-auto min-w-0 flex-col items-center gap-1.5 rounded-xl px-2 py-3 transition-transform duration-200 ease-out hover:-translate-y-0.5 data-[state=on]:-translate-y-0.5"
         >
-          <span className="text-2xl">{moodMeta[mood].emoji}</span>
-          <span className="flex flex-col items-start gap-1">
-            <span className="text-sm text-card-foreground">
-              {moodMeta[mood].label}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {moodMeta[mood].tone}
-            </span>
+          <span className="text-xl">{moodMeta[mood].emoji}</span>
+          <span className="text-[11px] text-muted-foreground">
+            {moodMeta[mood].label}
           </span>
         </ToggleGroupItem>
       ))}
