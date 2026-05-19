@@ -49,3 +49,17 @@ func errorResponse(c *fiber.Ctx, status int, code, message string) error {
 		"message": message,
 	})
 }
+
+func (h *ChatHandler) GetTodayMessages(c *fiber.Ctx) error {
+	userID, ok := c.Locals("userID").(string)
+	if !ok || userID == "" {
+		return errorResponse(c, fiber.StatusUnauthorized, "UNAUTHORIZED", "Authentication is required.")
+	}
+
+	resp, err := h.chatService.GetTodayMessages(c.Context(), userID)
+	if err != nil {
+		return errorResponse(c, fiber.StatusInternalServerError, "INTERNAL_ERROR", "Something went wrong.")
+	}
+
+	return c.Status(fiber.StatusOK).JSON(resp)
+}

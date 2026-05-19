@@ -3,9 +3,9 @@ package contract
 import (
 	"context"
 
-	userEntity "github.com/haramurti/Mono/internal/app/Users/entity"
 	"github.com/haramurti/Mono/internal/app/chat/dto"
 	chatEntity "github.com/haramurti/Mono/internal/app/chat/entity"
+	userEntity "github.com/haramurti/Mono/internal/app/users/entity"
 )
 
 // ─────────────────────────────────────────────
@@ -44,6 +44,7 @@ type UserMemoryRepository interface {
 type ChatService interface {
 	// SendMessage proses pesan user, call Gemini, return response
 	SendMessage(ctx context.Context, userID string, req *dto.SendMessageRequest) (*dto.SendMessageResponse, error)
+	GetTodayMessages(ctx context.Context, userID string) (*dto.GetChatMessagesResponse, error)
 }
 
 // ─────────────────────────────────────────────

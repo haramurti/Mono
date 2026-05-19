@@ -184,3 +184,49 @@ func journalStatus(isCompleted bool, userMsgCount int) string {
 	}
 	return "in_progress"
 }
+
+func (s *chatService) GetTodayMessages(ctx context.Context, userID string) (*dto.GetChatMessagesResponse, error) {
+	session, err := s.sessionRepo.FindTodayByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// belum ada session hari ini — return empty
+	if session == nil {
+		return &dto.GetChatMessagesResponse{
+			Messages: []dto.ChatMessageResponse{},
+			JournalState: dto.JournalStateResponse{
+				Date:             time.Now().Format("2006-01-02"),
+				Status:           "empty",
+				UserMessageCount: 0,
+			},
+		}, nil
+	}
+
+	messages, err := s.messageRepo.FindBySessionID(ctx, session.ID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	msgResponses := make([]dto.ChatMessageResponse, 0, len(messages))
+	for _, m := range messages {
+		msgResponses = append(msgResponses, dto.ChatMessageResponse{
+			ID:        m.ID.String(),
+			JournalID: session.ID.String(),
+			Role:      m.Role,
+			Content:   m.Content,
+			CreatedAt: m.CreatedAt.Format(time.RFC3339),
+		})
+	}
+
+	userMsgCount, _ := s.messageRepo.CountUserMessages(ctx, session.ID.String())
+
+	return &dto.GetChatMessagesResponse{
+		Messages: msgResponses,
+		JournalState: dto.JournalStateResponse{
+			Date:             session.Date.Format("2006-01-02"),
+			Status:           journalStatus(session.IsCompleted, userMsgCount),
+			UserMessageCount: userMsgCount,
+		},
+	}, nil
+}

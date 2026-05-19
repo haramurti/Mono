@@ -10,17 +10,17 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/haramurti/Mono/internal/app/Users/contract"
-	"github.com/haramurti/Mono/internal/app/Users/dto"
-	"github.com/haramurti/Mono/internal/app/Users/entity"
+	"github.com/haramurti/Mono/internal/app/users/contract"
+	"github.com/haramurti/Mono/internal/app/users/dto"
+	"github.com/haramurti/Mono/internal/app/users/entity"
 )
 
 type authService struct {
-	userRepo    contract.UserRepository
-	tokenRepo   contract.RefreshTokenRepository
-	jwtSecret   string
-	accessTTL   time.Duration
-	refreshTTL  time.Duration
+	userRepo   contract.UserRepository
+	tokenRepo  contract.RefreshTokenRepository
+	jwtSecret  string
+	accessTTL  time.Duration
+	refreshTTL time.Duration
 }
 
 func NewAuthService(

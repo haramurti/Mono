@@ -57,7 +57,7 @@ func (s *journalSummarizer) Summarize(ctx context.Context, chatHistory string) (
 
 	resp, err := s.client.Models.GenerateContent(ctx, "gemini-2.5-flash", contents, &genai.GenerateContentConfig{
 		Temperature:     ptr(float32(0.3)), // deterministik untuk structured output
-		MaxOutputTokens: 600,
+		MaxOutputTokens: 1500,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("gemini summarize failed: %w", err)
