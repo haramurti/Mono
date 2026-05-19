@@ -44,6 +44,7 @@ type UserMemoryRepository interface {
 type ChatService interface {
 	// SendMessage proses pesan user, call Gemini, return response
 	SendMessage(ctx context.Context, userID string, req *dto.SendMessageRequest) (*dto.SendMessageResponse, error)
+	GetTodayMessages(ctx context.Context, userID string) (*dto.GetChatMessagesResponse, error)
 }
 
 // ─────────────────────────────────────────────

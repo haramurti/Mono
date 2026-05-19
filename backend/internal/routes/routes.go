@@ -29,6 +29,7 @@ func SetupRoutes(
 	// ─── Chat (protected) ───
 	chatGroup := app.Group("/chat", jwtMiddleware)
 	chatGroup.Post("/messages", chat.SendMessage)
+	chatGroup.Get("/messages", chat.GetTodayMessages)
 
 	// ─── Journal (protected) ───
 	journalGroup := app.Group("/journals", jwtMiddleware)
